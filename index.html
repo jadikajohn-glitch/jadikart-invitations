@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Invitation de mariage</title>
+<meta name="description" content="Votre invitation personnelle de mariage">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#1F3A2E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Hanken+Grotesk:wght@400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
+<script>
+/* =====================================================================
+   CONFIGURATION — seule partie à modifier pour un autre projet Supabase.
+   La clé ci-dessous est la clé PUBLIQUE (publishable) : elle peut figurer
+   dans une page publique. Ne jamais mettre ici la clé secrète.
+   ===================================================================== */
+window.CONFIG = {
+  SUPABASE_URL: 'https://bdxscnjwmdgsjirzjwhp.supabase.co',
+  CLE_PUBLIQUE: 'sb_publishable_K0e6PNjhQ2ae32RkJLsBbA_cxSszRU-',
+  FUSEAU: 'Africa/Lubumbashi',
+  SIGNATURE: "Jadik'Art Design Studio"
+};
+/* Thème et lisibilité appliqués avant l'affichage (évite un flash). */
+(function () {
+  try {
+    var p = JSON.parse(localStorage.getItem('preferences') || '{}');
+    var h = document.documentElement;
+    if (p.theme) h.setAttribute('data-theme', p.theme);
+    if (p.grand) h.setAttribute('data-grand', '1');
+    if (p.contraste) h.setAttribute('data-contraste', '1');
+  } catch (e) {}
+})();
+</script>
+<script src="qr.js" defer></script>
+<style>
+/* ---------- Palette ---------- */
+:root {
+  --fond: #EDF0E8; --surface: #F8FAF4; --encre: #14281F; --encre-2: #3C5246;
+  --vert: #1F3A2E; --vert-clair: #DCE6DA; --or: #9A7A2E; --or-texte: #7A5F1F;
+  --ligne: #CBD5C6; --rouge: #9B2C22; --rouge-fond: #F6E3DF; --ok-fond: #DDEBDF;
+  --ombre: 0 1px 2px rgba(20,40,31,.06), 0 8px 24px rgba(20,40,31,.07);
+  --qr-encre: #14281F; --qr-fond: #FFFFFF;
+  --taille: 17px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #0E1813; --surface: #15231C; --encre: #E8EEE5; --encre-2: #B5C3B8;
+    --vert: #8FC1A6; --vert-clair: #1F3329; --or: #CBA859; --or-texte: #D9B868;
+    --ligne: #2B3E34; --rouge: #F0A196; --rouge-fond: #3A1D19; --ok-fond: #1C3326;
+    --ombre: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fond: #0E1813; --surface: #15231C; --encre: #E8EEE5; --encre-2: #B5C3B8;
+  --vert: #8FC1A6; --vert-clair: #1F3329; --or: #CBA859; --or-texte: #D9B868;
+  --ligne: #2B3E34; --rouge: #F0A196; --rouge-fond: #3A1D19; --ok-fond: #1C3326;
+  --ombre: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+/* Contraste élevé : noir sur blanc, lisible en plein soleil */
+:root[data-contraste="1"] {
+  --fond: #FFFFFF; --surface: #FFFFFF; --encre: #000000; --encre-2: #1A1A1A;
+  --vert: #0B2A1D; --vert-clair: #E4ECE4; --or: #5E4810; --or-texte: #4D3A0A;
+  --ligne: #000000; --rouge: #8A0E00; --rouge-fond: #FFE5E0; --ok-fond: #DDF0DF;
+  --ombre: none; color-scheme: light;
+}
+:root[data-grand="1"] { --taille: 21px; }
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: var(--taille); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--fond); color: var(--encre);
+  font: 400 1rem/1.55 "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh; overflow-x: hidden;
+}
+button, input, textarea { font: inherit; color: inherit; }
+a { color: var(--vert); }
+.page { max-width: 34rem; margin: 0 auto; padding: 1.25rem 16px 3rem; }
+.serif { font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif; }
+.script { font-family: "Pinyon Script", "Cormorant Garamond", cursive; font-weight: 400; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--or); outline-offset: 2px; border-radius: 6px; }
+
+/* ---------- En-tête ---------- */
+.entete { text-align: center; padding: 1.5rem 0 1rem; }
+.surtitre { letter-spacing: .28em; text-transform: uppercase; font-size: .72rem; font-weight: 600; color: var(--or-texte); margin: 0; }
+.monogramme {
+  width: 5.6rem; height: 5.6rem; margin: 1.1rem auto .4rem; border-radius: 50%;
+  border: 1.5px solid var(--or); display: grid; place-items: center; position: relative;
+  color: var(--vert); font-size: 2.4rem; line-height: 1;
+}
+.monogramme::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: .5px solid var(--or); opacity: .55; }
+.monogramme span { transform: translateY(.12em); }
+.maries { font-size: 2.55rem; line-height: 1.08; font-weight: 600; margin: .35rem 0 .2rem; color: var(--vert); overflow-wrap: anywhere; }
+.maries .et { display: block; font-size: 2rem; color: var(--or); margin: .1rem 0; }
+.date-ville { margin: .5rem 0 0; font-size: 1.12rem; font-weight: 600; color: var(--encre); }
+.date-ville small { display: block; font-weight: 500; font-size: .86rem; color: var(--encre-2); letter-spacing: .04em; margin-top: .15rem; }
+.ornement { display: block; margin: 1.1rem auto 0; width: 11rem; height: 14px; color: var(--or); }
+
+/* ---------- Cartes ---------- */
+.carte { background: var(--surface); border: 1px solid var(--ligne); border-radius: 18px; box-shadow: var(--ombre); padding: 1.35rem 1.15rem; margin-top: 1rem; }
+.carte h2 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 1.6rem; line-height: 1.15; margin: 0 0 .25rem; color: var(--vert); }
+.carte .intro { margin: 0 0 1rem; color: var(--encre-2); font-size: .95rem; }
+
+.invite-nom { text-align: center; }
+.invite-nom .a { margin: 0; font-size: .86rem; color: var(--encre-2); letter-spacing: .06em; }
+.invite-nom .nom { font-size: 2.35rem; line-height: 1.15; margin: .2rem 0 .65rem; color: var(--encre); overflow-wrap: anywhere; }
+.pastilles { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.pastille { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--ligne); background: var(--fond); border-radius: 999px; padding: .38rem .8rem; font-size: .9rem; font-weight: 600; }
+.pastille svg { width: 1.05rem; height: 1.05rem; color: var(--or); flex: none; }
+
+/* ---------- Programme ---------- */
+.programme { list-style: none; margin: 0; padding: 0; }
+.ev { display: grid; grid-template-columns: 2.9rem 1fr; gap: .9rem; padding: 1rem 0; border-top: 1px solid var(--ligne); }
+.ev:first-child { border-top: 0; padding-top: .2rem; }
+.ev-icone { width: 2.9rem; height: 2.9rem; border-radius: 50%; background: var(--vert-clair); color: var(--vert); display: grid; place-items: center; }
+.ev-icone svg { width: 1.45rem; height: 1.45rem; }
+.ev h3 { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.4rem; line-height: 1.2; font-weight: 600; }
+.ev .quand { margin: .15rem 0 .45rem; font-weight: 600; color: var(--or-texte); font-size: .95rem; }
+.ev dl { margin: 0; display: grid; gap: .3rem; font-size: .95rem; }
+.ev dl div { display: grid; grid-template-columns: 1.2rem 1fr; gap: .5rem; align-items: start; }
+.ev dt svg { width: 1.05rem; height: 1.05rem; color: var(--encre-2); margin-top: .2rem; }
+.ev dd { margin: 0; overflow-wrap: anywhere; }
+.ev dd .adr { display: block; color: var(--encre-2); font-size: .9rem; }
+
+/* ---------- Boutons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 3rem; padding: .7rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--vert); background: transparent; color: var(--vert); font-weight: 600; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.btn svg { width: 1.15rem; height: 1.15rem; flex: none; }
+.btn-plein { background: var(--vert); color: var(--surface); }
+:root[data-theme="dark"] .btn-plein { color: #0E1813; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-plein { color: #0E1813; } }
+.btn-large { width: 100%; font-size: 1.05rem; min-height: 3.4rem; }
+.btn-petit { min-height: 2.6rem; padding: .45rem .9rem; font-size: .92rem; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.lien-maps { margin-top: .65rem; }
+
+/* ---------- Formulaire de réponse ---------- */
+.rep-ev { border: 1px solid var(--ligne); border-radius: 14px; padding: 1rem; margin-top: .8rem; background: var(--fond); }
+.rep-ev legend { padding: 0 .3rem; font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.3rem; font-weight: 600; display: flex; align-items: center; gap: .5rem; color: var(--vert); }
+.rep-ev legend svg { width: 1.2rem; height: 1.2rem; }
+.choix { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+.choix label { position: relative; }
+.choix input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.choix span { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 3.3rem; padding: .55rem .5rem; border-radius: 12px; border: 1.5px solid var(--ligne); background: var(--surface); font-weight: 600; font-size: .95rem; line-height: 1.25; }
+.choix input:checked + span.oui { border-color: var(--vert); background: var(--vert); color: var(--surface); }
+.choix input:checked + span.non { border-color: var(--rouge); background: var(--rouge-fond); color: var(--rouge); }
+:root[data-theme="dark"] .choix input:checked + span.oui { color: #0E1813; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .choix input:checked + span.oui { color: #0E1813; } }
+.choix input:focus-visible + span { outline: 3px solid var(--or); outline-offset: 2px; }
+.detail { margin-top: .9rem; display: grid; gap: .75rem; }
+.detail[hidden] { display: none; }
+.compteur { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.compteur .lib { font-weight: 600; font-size: .95rem; }
+.compteur .ctrl { display: flex; align-items: center; gap: .35rem; }
+.compteur button { width: 3rem; height: 3rem; border-radius: 50%; border: 1.5px solid var(--vert); background: var(--surface); color: var(--vert); font-size: 1.4rem; font-weight: 600; cursor: pointer; display: grid; place-items: center; }
+.compteur button:disabled { opacity: .35; }
+.compteur output { min-width: 4.4rem; text-align: center; font-weight: 700; font-size: 1.1rem; }
+.compteur output small { font-weight: 500; color: var(--encre-2); font-size: .8rem; }
+.champ label, .champ .lib { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .3rem; }
+.champ .aide { font-weight: 400; color: var(--encre-2); }
+.champ input[type=text], .champ textarea { width: 100%; border: 1.5px solid var(--ligne); background: var(--surface); border-radius: 10px; padding: .7rem .8rem; min-height: 3rem; }
+.champ textarea { min-height: 4.6rem; resize: vertical; }
+.champ input:focus, .champ textarea:focus { border-color: var(--vert); outline: none; box-shadow: 0 0 0 3px var(--vert-clair); }
+.prenoms { display: grid; gap: .45rem; }
+.case { display: flex; align-items: center; gap: .7rem; min-height: 3rem; font-weight: 500; cursor: pointer; }
+.case input { width: 1.4rem; height: 1.4rem; accent-color: var(--vert); flex: none; }
+.lien-texte { background: none; border: 0; padding: .3rem 0; color: var(--vert); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: .92rem; }
+details.pratique { margin-top: 1rem; border-top: 1px solid var(--ligne); padding-top: .8rem; }
+details.pratique summary { cursor: pointer; font-weight: 600; min-height: 2.8rem; display: flex; align-items: center; gap: .5rem; list-style: none; color: var(--vert); }
+details.pratique summary::-webkit-details-marker { display: none; }
+details.pratique summary::before { content: "+"; display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 1.5px solid currentColor; font-size: 1rem; }
+details.pratique[open] summary::before { content: "–"; }
+details.pratique .corps { display: grid; gap: .6rem; padding-top: .5rem; }
+.consentement { font-size: .82rem; color: var(--encre-2); margin: 1rem 0; line-height: 1.45; }
+.alerte { border-radius: 12px; padding: .85rem 1rem; margin: .9rem 0 0; font-weight: 500; font-size: .95rem; }
+.alerte[hidden] { display: none; }
+.alerte.erreur { background: var(--rouge-fond); color: var(--rouge); border: 1px solid var(--rouge); }
+.alerte.info { background: var(--vert-clair); color: var(--encre); border: 1px solid var(--ligne); }
+.alerte.succes { background: var(--ok-fond); color: var(--encre); border: 1px solid var(--vert); }
+.echeance { display: flex; gap: .5rem; align-items: center; font-size: .9rem; font-weight: 600; color: var(--or-texte); margin: 0 0 .4rem; }
+.echeance svg { width: 1.05rem; height: 1.05rem; flex: none; }
+
+/* ---------- Résumé ---------- */
+.resume { list-style: none; margin: .8rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.resume li { display: flex; justify-content: space-between; gap: .8rem; align-items: center; padding: .7rem .85rem; border-radius: 12px; background: var(--fond); border: 1px solid var(--ligne); }
+.resume .ev-nom { font-weight: 600; }
+.resume .val { font-weight: 700; text-align: right; }
+.resume .val.non { color: var(--rouge); }
+.resume .val small { display: block; font-weight: 500; color: var(--encre-2); font-size: .8rem; }
+
+/* ---------- Pass d'entrée ---------- */
+.pass { text-align: center; }
+.pass .qr { display: inline-block; padding: .9rem; background: var(--qr-fond); border-radius: 16px; border: 1px solid var(--ligne); margin: .4rem 0 .6rem; line-height: 0; }
+.pass .qr svg { width: min(15rem, 66vw); height: auto; }
+.pass .note { font-size: .88rem; color: var(--encre-2); margin: 0 auto; max-width: 24rem; }
+
+/* ---------- États ---------- */
+.etat { text-align: center; padding: 2.5rem 1rem; }
+.etat .symbole { width: 4rem; height: 4rem; margin: 0 auto 1rem; border-radius: 50%; display: grid; place-items: center; background: var(--vert-clair); color: var(--vert); }
+.etat .symbole.rouge { background: var(--rouge-fond); color: var(--rouge); }
+.etat .symbole svg { width: 2rem; height: 2rem; }
+.etat h1 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 2rem; margin: 0 0 .5rem; color: var(--vert); font-weight: 600; line-height: 1.15; }
+.etat p { color: var(--encre-2); margin: 0 auto 1.2rem; max-width: 26rem; }
+.squelette { border-radius: 10px; background: linear-gradient(90deg, var(--vert-clair), var(--surface), var(--vert-clair)); background-size: 200% 100%; animation: sq 1.4s ease-in-out infinite; }
+@keyframes sq { from { background-position: 100% 0 } to { background-position: -100% 0 } }
+@media (prefers-reduced-motion: reduce) { .squelette { animation: none; } }
+
+/* ---------- Bandeaux ---------- */
+.bandeau { position: sticky; top: 0; z-index: 20; text-align: center; font-size: .85rem; font-weight: 600; padding: .55rem 16px; }
+.bandeau[hidden] { display: none; }
+.bandeau.demo { background: var(--or); color: #fff; }
+.bandeau.horsligne { background: var(--encre); color: var(--fond); }
+.filigrane { position: fixed; inset: 0; pointer-events: none; z-index: 15; overflow: hidden; display: none; }
+html[data-demo="1"] .filigrane { display: block; }
+.filigrane div { position: absolute; left: -50%; right: -50%; top: -50%; bottom: -50%; transform: rotate(-28deg); display: flex; flex-wrap: wrap; align-content: space-around; justify-content: space-around; gap: 4.5rem 3rem; font: 700 1.5rem/1 "Hanken Grotesk", sans-serif; letter-spacing: .3em; color: var(--or); opacity: .13; }
+
+/* ---------- Pied de page ---------- */
+.reglages { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; margin-top: 1.6rem; }
+.reglages button { min-height: 2.75rem; padding: .4rem .85rem; border-radius: 999px; border: 1px solid var(--ligne); background: var(--surface); font-size: .86rem; font-weight: 600; cursor: pointer; }
+.reglages button[aria-pressed="true"] { border-color: var(--vert); background: var(--vert-clair); }
+.pied { text-align: center; font-size: .78rem; color: var(--encre-2); margin-top: 1.4rem; }
+.pied a { color: inherit; }
+.contact { text-align: center; margin-top: 1.2rem; }
+@media print { .reglages, .bandeau, .contact, form, .lien-maps { display: none !important; } body { background: #fff; } .carte { box-shadow: none; } }
+</style>
+</head>
+<body>
+<div class="bandeau demo" id="bandeau-demo" hidden></div>
+<div class="bandeau horsligne" id="bandeau-horsligne" role="status" hidden></div>
+<div class="filigrane" aria-hidden="true"><div id="filigrane-texte"></div></div>
+<main class="page" id="app" aria-live="polite">
+  <div class="etat" aria-busy="true">
+    <div class="squelette" style="width:5.6rem;height:5.6rem;border-radius:50%;margin:0 auto 1.2rem"></div>
+    <div class="squelette" style="height:2.4rem;width:75%;margin:0 auto .8rem"></div>
+    <div class="squelette" style="height:1rem;width:45%;margin:0 auto 2rem"></div>
+    <div class="squelette" style="height:9rem;width:100%"></div>
+    <p class="sr">Chargement de votre invitation…</p>
+  </div>
+</main>
+
+<script>
+(function () {
+'use strict';
+
+/* =====================================================================
+   1. TEXTES — français par défaut. Pour ajouter le lingala ou le swahili,
+   remplir TEXTES.ln / TEXTES.sw avec les mêmes clés : toute clé absente
+   retombe automatiquement sur le français.
+   ===================================================================== */
+var TEXTES = {
+  fr: {
+    surtitre: 'Invitation au mariage de',
+    et: '&',
+    date_a_definir: 'Date à confirmer',
+    heure_a_definir: 'Heure à confirmer',
+    lieu_a_definir: 'Lieu communiqué prochainement',
+    a_lattention: 'À l’attention de',
+    personnes: { un: '{n} personne', plusieurs: '{n} personnes' },
+    detail_adultes: '{a} adulte(s), {e} enfant(s)',
+    table: 'Table {t}',
+    table_a_venir: 'Table communiquée prochainement',
+    programme: 'Programme',
+    programme_intro: 'Les moments auxquels vous êtes convié(e).',
+    tenue: 'Tenue',
+    itineraire: 'Itinéraire',
+    type: { civil: 'Cérémonie civile', religieux: 'Cérémonie religieuse', soiree: 'Soirée', autre: 'Événement' },
+    reponse_titre: 'Votre réponse',
+    reponse_intro: 'Merci de répondre pour chaque moment du programme.',
+    repondre_avant: 'Merci de répondre avant le {d}',
+    present: 'Je serai présent(e)',
+    absent: 'Je ne pourrai pas venir',
+    nb_presents: 'Personnes présentes',
+    sur: 'sur {n}',
+    prenoms: 'Prénoms des personnes présentes',
+    prenoms_aide: '(facultatif)',
+    prenom_n: 'Prénom {n}',
+    message: 'Un mot pour les mariés',
+    message_aide: '(facultatif)',
+    meme_reponse: 'Appliquer cette réponse à tous les moments',
+    pratique: 'Informations pratiques (facultatif)',
+    regimes: 'Régime alimentaire ou allergies',
+    regimes_ph: 'Ex. : sans arachide, végétarien…',
+    transport: 'J’aurai besoin d’un transport (navette)',
+    logement: 'Je viens de loin et j’aurai besoin d’un hébergement',
+    consentement: 'Vos réponses servent uniquement à l’organisation de ce mariage. Elles ne sont visibles que par les organisateurs et sont supprimées après l’événement. Vous pouvez demander leur suppression à tout moment auprès de l’organisateur.',
+    envoyer: 'Envoyer ma réponse',
+    envoi: 'Envoi en cours…',
+    modifier: 'Modifier ma réponse',
+    merci_titre: 'Merci, votre réponse est enregistrée',
+    merci_demo: 'Mode démonstration : la réponse n’a pas été enregistrée.',
+    reponse_enregistree_le: 'Réponse enregistrée le {d}',
+    modifiable_jusquau: 'Vous pouvez la modifier jusqu’au {d}.',
+    modifiable: 'Vous pouvez la modifier à tout moment.',
+    reponses_closes: 'Les réponses sont closes depuis le {d}.',
+    reponses_closes_sans: 'Les réponses sont closes. Contactez l’organisateur pour tout changement.',
+    oui_n: 'Présent · {p}',
+    non: 'Absent',
+    en_attente_envoi: 'Pas de réseau : votre réponse est gardée sur ce téléphone et sera envoyée automatiquement dès le retour de la connexion.',
+    envoi_differe_ok: 'Votre réponse gardée hors ligne vient d’être envoyée.',
+    pass_titre: 'Votre pass d’entrée',
+    pass_note: 'Présentez ce code à l’accueil. Une fois cette page ouverte, il reste disponible même sans connexion. Il est personnel : ne le partagez pas.',
+    contacter: 'Contacter l’organisateur',
+    erreur_repondre_tout: 'Merci de répondre pour chaque moment du programme (il manque : {l}).',
+    err: {
+      nombre_invalide: 'Le nombre de personnes ne peut pas dépasser {max}.',
+      delai_depasse: 'La date limite de réponse est dépassée. Contactez l’organisateur.',
+      trop_de_requetes: 'Trop d’envois rapprochés. Patientez quelques minutes puis réessayez.',
+      annulee: 'Cette invitation a été annulée.',
+      inconnue: 'Ce lien d’invitation n’est pas reconnu.',
+      evenement_non_invite: 'Une réponse concerne un moment auquel vous n’êtes pas invité(e). Rechargez la page.',
+      format: 'La réponse n’a pas pu être lue. Rechargez la page puis réessayez.',
+      reseau: 'Connexion impossible. Vérifiez votre réseau puis réessayez.',
+      inattendue: 'Une erreur inattendue est survenue. Réessayez dans un instant.'
+    },
+    etat_inconnue_titre: 'Lien non reconnu',
+    etat_inconnue_texte: 'Ce lien d’invitation est incomplet ou n’existe pas. Vérifiez qu’il a été copié en entier depuis votre message WhatsApp, ou contactez la personne qui vous l’a envoyé.',
+    etat_sans_lien_titre: 'Invitation personnelle',
+    etat_sans_lien_texte: 'Cette page s’ouvre avec le lien personnel reçu par WhatsApp. Ouvrez-le directement depuis votre message.',
+    etat_annulee_titre: 'Invitation annulée',
+    etat_annulee_texte: 'Cette invitation n’est plus valable. Pour toute question, contactez l’organisateur.',
+    etat_reseau_titre: 'Pas de connexion',
+    etat_reseau_texte: 'Impossible de charger votre invitation pour le moment. Vérifiez votre connexion internet, puis réessayez.',
+    reessayer: 'Réessayer',
+    horsligne: 'Hors connexion — affichage de la dernière version enregistrée',
+    demo_bandeau: 'DÉMONSTRATION — aucune réponse n’est enregistrée',
+    demo_filigrane: 'DÉMONSTRATION',
+    grands_caracteres: 'Grands caractères',
+    contraste: 'Contraste élevé',
+    theme_sombre: 'Mode sombre',
+    theme_clair: 'Mode clair',
+    signature: 'Invitation réalisée par {s}'
+  },
+  ln: { /* Lingala — à compléter (mêmes clés que fr) */ },
+  sw: { /* Swahili — à compléter (mêmes clés que fr) */ }
+};
+
+/* =====================================================================
+   2. UTILITAIRES
+   ===================================================================== */
+var CFG = window.CONFIG;
+var params = new URLSearchParams(location.search);
+var CODE = (params.get('i') || '').trim().toLowerCase();
+var MODE_DEMO = params.get('demo') === '1';
+var LANGUE = 'fr';
+
+function t(cle, vars) {
+  var ch = cle.split('.'), v = TEXTES[LANGUE], f = TEXTES.fr;
+  for (var k = 0; k < ch.length; k++) { v = v ? v[ch[k]] : undefined; f = f ? f[ch[k]] : undefined; }
+  var s = (v !== undefined && v !== '') ? v : f;
+  if (typeof s === 'string' && vars) s = s.replace(/\{(\w+)\}/g, function (_, n) { return vars[n] != null ? vars[n] : ''; });
+  return s;
+}
+function tPersonnes(n) { return t(n > 1 ? 'personnes.plusieurs' : 'personnes.un', { n: n }); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function $(sel, el) { return (el || document).querySelector(sel); }
+function $$(sel, el) { return Array.prototype.slice.call((el || document).querySelectorAll(sel)); }
+
+var stock = {
+  lire: function (k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  ecrire: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  effacer: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+
+function fmtDateSeule(iso) { // "2026-12-12" (date sans heure)
+  if (!iso) return null;
+  var d = new Date(iso + 'T12:00:00Z');
+  var s = new Intl.DateTimeFormat(LANGUE === 'fr' ? 'fr-FR' : LANGUE, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d);
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function fmtDateHeure(iso, opts) {
+  if (!iso) return null;
+  var s = new Intl.DateTimeFormat('fr-FR', Object.assign({ timeZone: CFG.FUSEAU }, opts)).format(new Date(iso));
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function fmtQuand(iso) {
+  if (!iso) return t('heure_a_definir');
+  return fmtDateHeure(iso, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).replace(' à ', ' · ').replace(':', ' h ');
+}
+function fmtLimite(iso) { return fmtDateHeure(iso, { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(':', ' h '); }
+function initiale(nom) { var m = String(nom || '').trim().match(/[A-Za-zÀ-ÿ]/); return m ? m[0].toUpperCase() : '·'; }
+function lienWhatsApp(num, texte) { var n = String(num || '').replace(/[^0-9]/g, ''); return n ? 'https://wa.me/' + n + (texte ? '?text=' + encodeURIComponent(texte) : '') : null; }
+
+/* ---------- Icônes (traits simples, couleur héritée) ---------- */
+var ICONES = {
+  civil: '<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20.5h18"/>',
+  religieux: '<path d="M12 2v4M10 4h4"/><path d="M6 21V11.5l6-5 6 5V21"/><path d="M10 21v-4.5a2 2 0 0 1 4 0V21"/><path d="M4 21h16"/>',
+  soiree: '<path d="M6.5 3h6l-.6 5.6a2.4 2.4 0 0 1-4.8 0z"/><path d="M9.5 11v8.5M6.5 21h6"/><path d="M17.5 4v4M15.5 6h4M18.5 12.5v2M17.5 13.5h2"/>',
+  autre: '<path d="M12 20s-7.5-4.5-7.5-10.2A4.1 4.1 0 0 1 12 7.4a4.1 4.1 0 0 1 7.5 2.4C19.5 15.5 12 20 12 20z"/>',
+  lieu: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+  tenue: '<path d="M12 7.2V6a2 2 0 1 0-2-2"/><path d="M12 7.2 3 14.5h18z"/><path d="M3 14.5V17h18v-2.5"/>',
+  personnes: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-5.8 6-5.8s6 2.2 6 5.8"/><path d="M16 4.9a3.1 3.1 0 0 1 0 6.1M18 14.4c1.9.6 3 2.5 3 5.6"/>',
+  table: '<ellipse cx="12" cy="9" rx="8.5" ry="3.5"/><path d="M12 12.5V20M8.5 20h7"/>',
+  carte: '<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+  horloge: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  whatsapp: '<path d="M4 20l1.2-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.2c0 3 2.6 5.8 5.8 5.8l1.2-1.4-1.9-1-.9.9c-1-.4-2.2-1.6-2.6-2.6l.9-.9-1-1.9z"/>',
+  lien: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  croix: '<path d="M7 7l10 10M17 7 7 17"/>',
+  alerte: '<path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/>',
+  coeur: '<path d="M12 20s-7.5-4.5-7.5-10.2A4.1 4.1 0 0 1 12 7.4a4.1 4.1 0 0 1 7.5 2.4C19.5 15.5 12 20 12 20z"/>'
+};
+function icone(nom) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONES[nom] || ICONES.autre) + '</svg>'; }
+var ORNEMENT = '<svg class="ornement" viewBox="0 0 176 14" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M0 7h66M110 7h66"/><path d="M88 1l6 6-6 6-6-6z"/><path d="M74 7l4-4 4 4-4 4zM94 7l4-4 4 4-4 4z" opacity=".7"/><circle cx="68" cy="7" r="1.3" fill="currentColor"/><circle cx="108" cy="7" r="1.3" fill="currentColor"/></svg>';
+
+/* =====================================================================
+   3. ACCÈS AUX DONNÉES (uniquement les fonctions publiques Supabase)
+   ===================================================================== */
+function rpc(fonction, corps, delaiMs) {
+  var ctrl = ('AbortController' in window) ? new AbortController() : null;
+  var minuterie = ctrl ? setTimeout(function () { ctrl.abort(); }, delaiMs || 15000) : null;
+  return fetch(CFG.SUPABASE_URL + '/rest/v1/rpc/' + fonction, {
+    method: 'POST',
+    headers: { 'apikey': CFG.CLE_PUBLIQUE, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(corps),
+    signal: ctrl ? ctrl.signal : undefined,
+    cache: 'no-store'
+  }).then(function (r) {
+    if (minuterie) clearTimeout(minuterie);
+    if (!r.ok) { var e = new Error('http ' + r.status); e.http = r.status; throw e; }
+    return r.json();
+  }, function (e) { if (minuterie) clearTimeout(minuterie); e.reseau = true; throw e; });
+}
+function avecReessais(fn, essais) {
+  return fn().catch(function (e) {
+    if (essais <= 0 || !(e.reseau || e.http >= 500)) throw e;
+    return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return avecReessais(fn, essais - 1); });
+  });
+}
+
+/* Données de démonstration (page ouverte avec ?demo=1 sans lien personnel). Fictives. */
+function donneesDemo() {
+  return {
+    etat: 'ok',
+    mariage: { marie_1: 'Amani', marie_2: 'Grâce', ville: 'Lubumbashi', date: null, langue: 'fr', reponses_jusqu_au: null, reponses_ouvertes: true, whatsapp_organisateur: null },
+    invite: { nom: 'Famille Exemple', adultes: 2, enfants: 1, total: 3, demo: true, qr: 'DEMO-0000000000000000000000000000', table: '7', accompagnants: [] },
+    evenements: [
+      { id: 'demo-civil', type: 'civil', titre: 'Cérémonie civile', lieu: 'Maison communale', adresse: 'Lubumbashi', maps_url: null, debut: null, tenue: 'Tenue de ville', reponse: null },
+      { id: 'demo-religieux', type: 'religieux', titre: 'Bénédiction nuptiale', lieu: 'Paroisse', adresse: 'Lubumbashi', maps_url: null, debut: null, tenue: 'Tenue de cérémonie', reponse: null },
+      { id: 'demo-soiree', type: 'soiree', titre: 'Soirée dansante', lieu: 'Salle de réception', adresse: 'Lubumbashi', maps_url: null, debut: null, tenue: 'Chic — touche de vert', reponse: null }
+    ]
+  };
+}
+
+/* =====================================================================
+   4. ÉTAT DE LA PAGE
+   ===================================================================== */
+var APP = $('#app');
+var D = null;               // données de l'invitation
+var CHOIX = {};             // { evenement_id: { present, nb, prenoms[], message } }
+var INFOS = { regimes: '', transport: false, logement: false };
+var EDITION = true;         // formulaire affiché (sinon résumé)
+var DEMO = false;           // filigrane + aucun enregistrement
+var CLE_CACHE = 'inv:' + CODE, CLE_ATTENTE = 'attente:' + CODE, CLE_BROUILLON = 'brouillon:' + CODE;
+
+function definirDemo(actif) {
+  DEMO = actif;
+  document.documentElement.setAttribute('data-demo', actif ? '1' : '0');
+  var b = $('#bandeau-demo');
+  b.hidden = !actif; b.textContent = t('demo_bandeau');
+  if (actif) { var f = ''; for (var k = 0; k < 40; k++) f += '<span>' + esc(t('demo_filigrane')) + '</span>'; $('#filigrane-texte').innerHTML = f; }
+}
+function bandeauHorsLigne(visible) { var b = $('#bandeau-horsligne'); b.hidden = !visible; b.textContent = t('horsligne'); }
+
+function initialiserChoix() {
+  CHOIX = {};
+  var total = D.invite.total;
+  var deja = D.evenements.some(function (e) { return e.reponse; });
+  D.evenements.forEach(function (e) {
+    var r = e.reponse;
+    CHOIX[e.id] = r
+      ? { present: r.present, nb: r.present ? r.nb : total, prenoms: (r.prenoms || []).slice(), message: '' }
+      : { present: null, nb: total, prenoms: (D.invite.accompagnants || []).slice(), message: '' };
+  });
+  var b = stock.lire(CLE_BROUILLON);   // brouillon non envoyé (page fermée en cours de saisie)
+  if (b && b.choix) { Object.keys(b.choix).forEach(function (id) { if (CHOIX[id]) CHOIX[id] = b.choix[id]; }); if (b.infos) INFOS = b.infos; }
+  EDITION = !deja || !!stock.lire(CLE_ATTENTE);
+}
+function sauverBrouillon() { if (!DEMO) stock.ecrire(CLE_BROUILLON, { choix: CHOIX, infos: INFOS }); }
+
+/* =====================================================================
+   5. AFFICHAGE
+   ===================================================================== */
+function rendreEtat(type, texteSup) {
+  var rouge = type === 'annulee' || type === 'inconnue';
+  var ic = { annulee: 'croix', inconnue: 'lien', sans_lien: 'coeur', reseau: 'alerte' }[type];
+  var m = D && D.mariage;
+  var contact = m && m.whatsapp_organisateur ? '<a class="btn" href="' + esc(lienWhatsApp(m.whatsapp_organisateur)) + '" target="_blank" rel="noopener">' + icone('whatsapp') + esc(t('contacter')) + '</a>' : '';
+  APP.innerHTML =
+    '<section class="etat">' +
+      (m ? '<p class="surtitre">' + esc(m.marie_1) + ' ' + esc(t('et')) + ' ' + esc(m.marie_2) + '</p><br>' : '') +
+      '<div class="symbole' + (rouge ? ' rouge' : '') + '">' + icone(ic) + '</div>' +
+      '<h1>' + esc(t('etat_' + type + '_titre')) + '</h1>' +
+      '<p>' + esc(t('etat_' + type + '_texte')) + (texteSup ? '<br>' + esc(texteSup) : '') + '</p>' +
+      (type === 'reseau' ? '<button class="btn btn-plein" id="reessayer">' + esc(t('reessayer')) + '</button>' : contact) +
+    '</section>' + reglagesHtml();
+  var r = $('#reessayer'); if (r) r.addEventListener('click', demarrer);
+  brancherReglages();
+}
+
+function rendreInvitation() {
+  var m = D.mariage, inv = D.invite, evs = D.evenements;
+  document.title = m.marie_1 + ' & ' + m.marie_2 + ' — Invitation';
+  var dateTxt = fmtDateSeule(m.date) || t('date_a_definir');
+  var detailPers = inv.enfants > 0 ? ' <small>(' + esc(t('detail_adultes', { a: inv.adultes, e: inv.enfants })) + ')</small>' : '';
+
+  var h = '';
+  // En-tête
+  h += '<header class="entete">' +
+         '<p class="surtitre">' + esc(t('surtitre')) + '</p>' +
+         '<div class="monogramme script" aria-hidden="true"><span>' + esc(initiale(m.marie_1)) + '&thinsp;' + esc(initiale(m.marie_2)) + '</span></div>' +
+         '<h1 class="maries serif">' + esc(m.marie_1) + '<span class="et script">' + esc(t('et')) + '</span>' + esc(m.marie_2) + '</h1>' +
+         '<p class="date-ville">' + esc(dateTxt) + (m.ville ? '<small>' + esc(m.ville) + '</small>' : '') + '</p>' +
+         ORNEMENT +
+       '</header>';
+  // Invité
+  h += '<section class="carte invite-nom" aria-labelledby="nom-invite">' +
+         '<p class="a">' + esc(t('a_lattention')) + '</p>' +
+         '<p class="nom script" id="nom-invite">' + esc(inv.nom) + '</p>' +
+         '<div class="pastilles">' +
+           '<span class="pastille">' + icone('personnes') + esc(tPersonnes(inv.total)) + detailPers + '</span>' +
+           '<span class="pastille">' + icone('table') + esc(inv.table ? t('table', { t: inv.table }) : t('table_a_venir')) + '</span>' +
+         '</div>' +
+       '</section>';
+  // Programme
+  h += '<section class="carte" aria-labelledby="titre-prog"><h2 id="titre-prog">' + esc(t('programme')) + '</h2><p class="intro">' + esc(t('programme_intro')) + '</p><ol class="programme">';
+  evs.forEach(function (e) {
+    var maps = e.maps_url || (e.adresse || e.lieu ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([e.lieu, e.adresse, m.ville].filter(Boolean).join(', ')) : null);
+    h += '<li class="ev">' +
+           '<div class="ev-icone">' + icone(e.type) + '</div>' +
+           '<div><h3>' + esc(e.titre || t('type.' + e.type)) + '</h3>' +
+             '<p class="quand">' + esc(fmtQuand(e.debut)) + '</p>' +
+             '<dl>' +
+               '<div><dt>' + icone('lieu') + '<span class="sr">Lieu</span></dt><dd>' + esc(e.lieu || t('lieu_a_definir')) + (e.adresse ? '<span class="adr">' + esc(e.adresse) + '</span>' : '') + '</dd></div>' +
+               (e.tenue ? '<div><dt>' + icone('tenue') + '<span class="sr">' + esc(t('tenue')) + '</span></dt><dd>' + esc(t('tenue')) + ' : ' + esc(e.tenue) + '</dd></div>' : '') +
+             '</dl>' +
+             (maps ? '<a class="btn btn-petit lien-maps" href="' + esc(maps) + '" target="_blank" rel="noopener">' + icone('carte') + esc(t('itineraire')) + '</a>' : '') +
+           '</div>' +
+         '</li>';
+  });
+  h += '</ol></section>';
+  // Réponse
+  h += '<section class="carte" id="zone-reponse" aria-labelledby="titre-rep"></section>';
+  // Pass d'entrée
+  h += '<section class="carte pass" aria-labelledby="titre-pass"><h2 id="titre-pass">' + esc(t('pass_titre')) + '</h2>' +
+         '<div class="qr" id="qr"></div><p class="note">' + esc(t('pass_note')) + '</p></section>';
+  // Contact + réglages
+  if (m.whatsapp_organisateur) {
+    h += '<div class="contact"><a class="btn" href="' + esc(lienWhatsApp(m.whatsapp_organisateur, 'Bonjour, je vous écris au sujet de l’invitation de ' + inv.nom + '.')) + '" target="_blank" rel="noopener">' + icone('whatsapp') + esc(t('contacter')) + '</a></div>';
+  }
+  h += reglagesHtml();
+  APP.innerHTML = h;
+  rendreQR();
+  rendreZoneReponse();
+  brancherReglages();
+}
+
+function rendreQR() {
+  var zone = $('#qr'); if (!zone) return;
+  if (!window.QR) { setTimeout(rendreQR, 120); return; }   // qr.js chargé en différé
+  zone.innerHTML = window.QR.svg(D.invite.qr, { taille: 240, marge: 2, couleur: '#14281F', fond: '#FFFFFF', label: t('pass_titre') });
+}
+
+function rendreZoneReponse() {
+  var z = $('#zone-reponse'), m = D.mariage;
+  var ouvertes = m.reponses_ouvertes !== false;
+  var limite = m.reponses_jusqu_au ? fmtLimite(m.reponses_jusqu_au) : null;
+  var h = '<h2 id="titre-rep">' + esc(t('reponse_titre')) + '</h2>';
+
+  if (!ouvertes) {
+    h += '<p class="intro">' + esc(limite ? t('reponses_closes', { d: limite }) : t('reponses_closes_sans')) + '</p>';
+    h += resumeHtml();
+    z.innerHTML = h; return;
+  }
+  if (!EDITION) {
+    var derniere = D.evenements.map(function (e) { return e.reponse && e.reponse.le; }).filter(Boolean).sort().pop();
+    h += '<div class="alerte succes" role="status"><strong>' + esc(t('merci_titre')) + '</strong>' +
+         (derniere ? '<br>' + esc(t('reponse_enregistree_le', { d: fmtLimite(derniere) })) : '') + '</div>';
+    h += resumeHtml();
+    h += '<p class="intro" style="margin-top:.9rem">' + esc(limite ? t('modifiable_jusquau', { d: limite }) : t('modifiable')) + '</p>';
+    h += '<button class="btn btn-large" id="btn-modifier" type="button">' + esc(t('modifier')) + '</button>';
+    z.innerHTML = h;
+    $('#btn-modifier').addEventListener('click', function () { EDITION = true; rendreZoneReponse(); $('#zone-reponse').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    return;
+  }
+
+  h += (limite ? '<p class="echeance">' + icone('horloge') + esc(t('repondre_avant', { d: limite })) + '</p>' : '');
+  h += '<p class="intro">' + esc(t('reponse_intro')) + '</p>';
+  h += '<form id="form-reponse" novalidate>';
+  D.evenements.forEach(function (e, idx) { h += blocEvenementHtml(e, idx); });
+  h += '<details class="pratique"' + (INFOS.regimes || INFOS.transport || INFOS.logement ? ' open' : '') + '><summary>' + esc(t('pratique')) + '</summary><div class="corps">' +
+         '<div class="champ"><label for="regimes">' + esc(t('regimes')) + '</label><input type="text" id="regimes" maxlength="300" autocomplete="off" placeholder="' + esc(t('regimes_ph')) + '" value="' + esc(INFOS.regimes) + '"></div>' +
+         '<label class="case"><input type="checkbox" id="transport"' + (INFOS.transport ? ' checked' : '') + '>' + esc(t('transport')) + '</label>' +
+         '<label class="case"><input type="checkbox" id="logement"' + (INFOS.logement ? ' checked' : '') + '>' + esc(t('logement')) + '</label>' +
+       '</div></details>';
+  h += '<p class="consentement">' + esc(t('consentement')) + '</p>';
+  h += '<button class="btn btn-plein btn-large" type="submit" id="btn-envoyer">' + esc(t('envoyer')) + '</button>';
+  h += '<div class="alerte erreur" id="msg-erreur" role="alert" hidden></div>';
+  h += '<div class="alerte info" id="msg-attente" role="status"' + (stock.lire(CLE_ATTENTE) ? '' : ' hidden') + '>' + esc(t('en_attente_envoi')) + '</div>';
+  h += '</form>';
+  z.innerHTML = h;
+  brancherFormulaire();
+}
+
+function blocEvenementHtml(e, idx) {
+  var c = CHOIX[e.id], total = D.invite.total, nom = 'p-' + idx;
+  var h = '<fieldset class="rep-ev" data-ev="' + esc(e.id) + '">' +
+            '<legend>' + icone(e.type) + esc(e.titre || t('type.' + e.type)) + '</legend>' +
+            '<div class="choix">' +
+              '<label><input type="radio" name="' + nom + '" value="oui"' + (c.present === true ? ' checked' : '') + '><span class="oui">' + esc(t('present')) + '</span></label>' +
+              '<label><input type="radio" name="' + nom + '" value="non"' + (c.present === false ? ' checked' : '') + '><span class="non">' + esc(t('absent')) + '</span></label>' +
+            '</div>' +
+            '<div class="detail"' + (c.present === true ? '' : ' hidden') + '>';
+  if (total > 1) {
+    h += '<div class="compteur"><span class="lib" id="lib-nb-' + idx + '">' + esc(t('nb_presents')) + '</span>' +
+           '<span class="ctrl"><button type="button" class="moins" aria-label="Une personne de moins">−</button>' +
+           '<output aria-labelledby="lib-nb-' + idx + '" aria-live="polite"><span class="v">' + c.nb + '</span><br><small>' + esc(t('sur', { n: total })) + '</small></output>' +
+           '<button type="button" class="plus" aria-label="Une personne de plus">+</button></span></div>';
+  }
+  h += '<div class="champ"><span class="lib">' + esc(t('prenoms')) + ' <span class="aide">' + esc(t('prenoms_aide')) + '</span></span><div class="prenoms"></div></div>';
+  h += '<div class="champ"><label for="msg-' + idx + '">' + esc(t('message')) + ' <span class="aide">' + esc(t('message_aide')) + '</span></label><textarea id="msg-' + idx + '" maxlength="1000" rows="2"></textarea></div>';
+  h += '</div>';
+  if (idx === 0 && D.evenements.length > 1) h += '<button type="button" class="lien-texte" id="meme-partout">' + esc(t('meme_reponse')) + '</button>';
+  h += '</fieldset>';
+  return h;
+}
+
+function rendrePrenoms(fs) {
+  var id = fs.getAttribute('data-ev'), c = CHOIX[id], zone = $('.prenoms', fs);
+  var nb = D.invite.total > 1 ? c.nb : 1, h = '';
+  for (var k = 0; k < nb; k++) {
+    h += '<input type="text" maxlength="60" autocomplete="off" aria-label="' + esc(t('prenom_n', { n: k + 1 })) + '" placeholder="' + esc(t('prenom_n', { n: k + 1 })) + '" value="' + esc(c.prenoms[k] || '') + '">';
+  }
+  zone.innerHTML = h;
+  $$('input', zone).forEach(function (inp, k) {
+    inp.addEventListener('input', function () { c.prenoms[k] = inp.value; sauverBrouillon(); });
+  });
+  var moins = $('.moins', fs), plus = $('.plus', fs);
+  if (moins) { moins.disabled = c.nb <= 1; plus.disabled = c.nb >= D.invite.total; $('.v', fs).textContent = c.nb; }
+}
+
+function brancherFormulaire() {
+  $$('.rep-ev').forEach(function (fs) {
+    var id = fs.getAttribute('data-ev'), c = CHOIX[id];
+    $('textarea', fs).value = c.message || '';
+    $('textarea', fs).addEventListener('input', function (ev) { c.message = ev.target.value; sauverBrouillon(); });
+    $$('input[type=radio]', fs).forEach(function (r) {
+      r.addEventListener('change', function () {
+        c.present = r.value === 'oui';
+        if (c.present && (!c.nb || c.nb < 1)) c.nb = D.invite.total;
+        $('.detail', fs).hidden = !c.present;
+        sauverBrouillon(); cacherErreur();
+      });
+    });
+    var moins = $('.moins', fs), plus = $('.plus', fs);
+    if (moins) {
+      moins.addEventListener('click', function () { if (c.nb > 1) { c.nb--; c.prenoms = c.prenoms.slice(0, c.nb); rendrePrenoms(fs); sauverBrouillon(); } });
+      plus.addEventListener('click', function () { if (c.nb < D.invite.total) { c.nb++; rendrePrenoms(fs); sauverBrouillon(); } });
+    }
+    rendrePrenoms(fs);
+  });
+  var meme = $('#meme-partout');
+  if (meme) meme.addEventListener('click', function () {
+    var premier = CHOIX[D.evenements[0].id];
+    if (premier.present === null) { montrerErreur(t('erreur_repondre_tout', { l: D.evenements[0].titre })); return; }
+    D.evenements.slice(1).forEach(function (e) { CHOIX[e.id] = { present: premier.present, nb: premier.nb, prenoms: premier.prenoms.slice(), message: CHOIX[e.id].message || '' }; });
+    sauverBrouillon(); rendreZoneReponse();
+  });
+  $('#regimes').addEventListener('input', function (e) { INFOS.regimes = e.target.value; sauverBrouillon(); });
+  $('#transport').addEventListener('change', function (e) { INFOS.transport = e.target.checked; sauverBrouillon(); });
+  $('#logement').addEventListener('change', function (e) { INFOS.logement = e.target.checked; sauverBrouillon(); });
+  $('#form-reponse').addEventListener('submit', function (ev) { ev.preventDefault(); envoyer(); });
+}
+
+function resumeHtml() {
+  var h = '<ul class="resume">';
+  D.evenements.forEach(function (e) {
+    var r = e.reponse;
+    var val = !r ? '—' : (r.present
+      ? esc(t('oui_n', { p: tPersonnes(r.nb) })) + ((r.prenoms || []).length ? '<small>' + esc(r.prenoms.join(', ')) + '</small>' : '')
+      : esc(t('non')));
+    h += '<li><span class="ev-nom">' + esc(e.titre || t('type.' + e.type)) + '</span><span class="val' + (r && !r.present ? ' non' : '') + '">' + val + '</span></li>';
+  });
+  return h + '</ul>';
+}
+
+function montrerErreur(txt) { var e = $('#msg-erreur'); if (!e) return; e.textContent = txt; e.hidden = false; e.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function cacherErreur() { var e = $('#msg-erreur'); if (e) e.hidden = true; }
+
+/* =====================================================================
+   6. ENVOI DE LA RÉPONSE (avec file d'attente hors ligne)
+   ===================================================================== */
+function construireEnvoi() {
+  var manque = D.evenements.filter(function (e) { return CHOIX[e.id].present === null; });
+  if (manque.length) return { erreur: t('erreur_repondre_tout', { l: manque.map(function (e) { return e.titre; }).join(', ') }) };
+  var total = D.invite.total;
+  var reponses = D.evenements.map(function (e) {
+    var c = CHOIX[e.id], nb = c.present ? (total > 1 ? c.nb : 1) : 0;
+    if (c.present && (nb < 1 || nb > total)) return null;
+    return { evenement_id: e.id, present: c.present, nb: nb,
+             prenoms: c.present ? c.prenoms.slice(0, nb).map(function (p) { return String(p || '').trim(); }).filter(Boolean) : [],
+             message: (c.message || '').trim() };
+  });
+  if (reponses.indexOf(null) >= 0) return { erreur: t('err.nombre_invalide', { max: total }) };
+  return { corps: { p_code: CODE, p_reponses: reponses, p_infos: { regimes: (INFOS.regimes || '').trim(), transport: !!INFOS.transport, logement: !!INFOS.logement } } };
+}
+
+function appliquerLocalement(corps) {
+  var maintenant = new Date().toISOString();
+  corps.p_reponses.forEach(function (r) {
+    var e = D.evenements.filter(function (x) { return x.id === r.evenement_id; })[0];
+    if (e) e.reponse = { present: r.present, nb: r.nb, prenoms: r.prenoms, le: maintenant };
+  });
+}
+
+function envoyer() {
+  cacherErreur();
+  var p = construireEnvoi();
+  if (p.erreur) { montrerErreur(p.erreur); return; }
+  var btn = $('#btn-envoyer'); btn.disabled = true; btn.textContent = t('envoi');
+
+  if (DEMO) {  // aucun appel réseau, rien n'est enregistré
+    setTimeout(function () { appliquerLocalement(p.corps); EDITION = false; rendreZoneReponse(); var s = $('#zone-reponse .alerte.succes'); if (s) s.insertAdjacentHTML('beforeend', '<br><em>' + esc(t('merci_demo')) + '</em>'); }, 300);
+    return;
+  }
+  rpc('soumettre_reponse', p.corps).then(function (res) {
+    if (res && res.ok) {
+      stock.effacer(CLE_ATTENTE); stock.effacer(CLE_BROUILLON);
+      appliquerLocalement(p.corps); stock.ecrire(CLE_CACHE, D);
+      EDITION = false; rendreZoneReponse();
+      $('#zone-reponse').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      btn.disabled = false; btn.textContent = t('envoyer');
+      var code = (res && res.erreur) || 'inattendue';
+      montrerErreur(t('err.' + code, { max: res && res.max }) || t('err.inattendue'));
+      if (code === 'annulee' || code === 'inconnue') setTimeout(demarrer, 2500);
+    }
+  }).catch(function (e) {
+    btn.disabled = false; btn.textContent = t('envoyer');
+    if (e.reseau || e.http >= 500) {      // réseau coupé ou serveur indisponible : on garde la réponse
+      stock.ecrire(CLE_ATTENTE, p.corps);
+      $('#msg-attente').hidden = false;
+    } else { montrerErreur(t('err.inattendue')); }
+  });
+}
+
+function envoyerAttente() {
+  var corps = stock.lire(CLE_ATTENTE);
+  if (!corps || DEMO || !navigator.onLine) return;
+  rpc('soumettre_reponse', corps).then(function (res) {
+    if (res && res.ok) {
+      stock.effacer(CLE_ATTENTE); stock.effacer(CLE_BROUILLON);
+      if (D) { appliquerLocalement(corps); stock.ecrire(CLE_CACHE, D); EDITION = false; rendreZoneReponse();
+        var s = $('#zone-reponse .alerte.succes'); if (s) s.insertAdjacentHTML('beforeend', '<br>' + esc(t('envoi_differe_ok'))); }
+    } else if (res && res.erreur) {
+      stock.effacer(CLE_ATTENTE);   // refus définitif (délai, annulation…) : on informe
+      if (D) { var a = $('#msg-attente'); if (a) a.hidden = true; montrerErreur(t('err.' + res.erreur, { max: res.max }) || t('err.inattendue')); }
+    }
+  }).catch(function () { /* toujours hors ligne : on réessaiera */ });
+}
+
+/* =====================================================================
+   7. RÉGLAGES (lisibilité, thème)
+   ===================================================================== */
+function prefs() { return stock.lire('preferences') || {}; }
+function themeEffectif() { var p = prefs(); return p.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+function reglagesHtml() {
+  var p = prefs(), sombre = themeEffectif() === 'dark';
+  return '<div class="reglages" role="group" aria-label="Affichage">' +
+           '<button type="button" data-r="grand" aria-pressed="' + !!p.grand + '">A+ ' + esc(t('grands_caracteres')) + '</button>' +
+           '<button type="button" data-r="contraste" aria-pressed="' + !!p.contraste + '">' + esc(t('contraste')) + '</button>' +
+           '<button type="button" data-r="theme" aria-pressed="false">' + esc(sombre ? t('theme_clair') : t('theme_sombre')) + '</button>' +
+         '</div>' +
+         '<p class="pied">' + esc(t('signature', { s: CFG.SIGNATURE })) + '</p>';
+}
+function brancherReglages() {
+  $$('.reglages button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var p = prefs(), r = b.getAttribute('data-r'), h = document.documentElement;
+      if (r === 'theme') { p.theme = themeEffectif() === 'dark' ? 'light' : 'dark'; h.setAttribute('data-theme', p.theme); b.textContent = p.theme === 'dark' ? t('theme_clair') : t('theme_sombre'); }
+      else { p[r] = !p[r]; h.setAttribute(r === 'grand' ? 'data-grand' : 'data-contraste', p[r] ? '1' : '0'); b.setAttribute('aria-pressed', String(p[r])); }
+      stock.ecrire('preferences', p);
+    });
+  });
+}
+
+/* =====================================================================
+   8. DÉMARRAGE
+   ===================================================================== */
+function afficher(donnees, depuisCache) {
+  D = donnees;
+  if (D.mariage && TEXTES[D.mariage.langue]) LANGUE = params.get('lang') && TEXTES[params.get('lang')] ? params.get('lang') : D.mariage.langue;
+  document.documentElement.lang = LANGUE;
+  if (D.etat === 'annulee') { stock.effacer(CLE_CACHE); return rendreEtat('annulee'); }
+  if (D.etat !== 'ok') { stock.effacer(CLE_CACHE); return rendreEtat('inconnue'); }
+  definirDemo(MODE_DEMO || !!D.invite.demo);
+  initialiserChoix();
+  rendreInvitation();
+  bandeauHorsLigne(!!depuisCache);
+}
+
+function demarrer() {
+  if (!CODE) {
+    if (MODE_DEMO) { definirDemo(true); return afficher(donneesDemo(), false); }
+    return rendreEtat('sans_lien');
+  }
+  if (!/^[a-z0-9-]{3,80}$/.test(CODE)) return rendreEtat('inconnue');
+  var cache = stock.lire(CLE_CACHE);
+  if (cache && cache.etat === 'ok') afficher(cache, false);  // affichage immédiat, même sans réseau
+  avecReessais(function () { return rpc('get_invitation', { p_code: CODE }); }, 2).then(function (donnees) {
+    if (donnees && donnees.etat === 'ok' && !(donnees.invite.demo || MODE_DEMO)) stock.ecrire(CLE_CACHE, donnees);
+    // Ne pas écraser une saisie en cours si rien n'a changé côté serveur
+    if (cache && D && EDITION && $('#form-reponse') && JSON.stringify(cache) === JSON.stringify(donnees)) { bandeauHorsLigne(false); return; }
+    afficher(donnees, false);
+    envoyerAttente();
+  }).catch(function () {
+    if (cache && cache.etat === 'ok') bandeauHorsLigne(true);
+    else rendreEtat('reseau');
+  });
+}
+
+window.addEventListener('online', function () { bandeauHorsLigne(false); envoyerAttente(); });
+window.addEventListener('offline', function () { if (D && D.etat === 'ok') bandeauHorsLigne(true); });
+demarrer();
+})();
+</script>
+</body>
+</html>
