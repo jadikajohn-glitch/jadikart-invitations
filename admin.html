@@ -1014,7 +1014,11 @@ function ajouterMembre(ev) {
 }
 function exporterCsv() {
   var col = ['Nom', 'Téléphone', 'Relais', 'Groupe', 'Adultes', 'Enfants', 'Table', 'Statut', 'Démo', 'Lien'].concat(S.ev.map(function (e) { return e.titre; })).concat(['Régimes', 'Notes']);
-  var cel = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  var cel = function (v) {
+    v = String(v == null ? '' : v);
+    if (/^[=@\-\t\r]/.test(v) || /^\+[^0-9]/.test(v)) v = "'" + v;   // empêche Excel d'exécuter une formule cachée dans un nom
+    return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  };
   var lignes = S.invites.map(function (i) {
     var t = tableDe(i.table_id);
     return [i.nom, i.telephone, i.via_relais ? 'oui' : '', nomGroupe(i.groupe), i.adultes, i.enfants, t ? t.nom : '', STATUTS[i.statut], i.demo ? 'oui' : '', lienInvite(i)]
