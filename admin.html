@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Administration — Invitations</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#1F3A2E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+/* =====================================================================
+   CONFIGURATION — identique à index.html. Clé PUBLIQUE uniquement.
+   Les données ne sont lisibles qu'après connexion, selon le rôle
+   (administrateur, organisateur, hôte) : c'est la base qui contrôle.
+   ===================================================================== */
+window.CONFIG = {
+  SUPABASE_URL: 'https://bdxscnjwmdgsjirzjwhp.supabase.co',
+  CLE_PUBLIQUE: 'sb_publishable_K0e6PNjhQ2ae32RkJLsBbA_cxSszRU-',
+  FUSEAU: 'Africa/Lubumbashi',
+  DECALAGE: '+02:00',          // Lubumbashi : UTC+2 toute l'année
+  INDICATIF: '243'             // numéros commençant par 0 → +243
+};
+(function () { try { var p = JSON.parse(localStorage.getItem('preferences') || '{}'); if (p.theme) document.documentElement.setAttribute('data-theme', p.theme); } catch (e) {} })();
+</script>
+<style>
+:root {
+  --fond: #EDF0E8; --surface: #F8FAF4; --encre: #14281F; --encre-2: #4A5F53; --vert: #1F3A2E; --vert-clair: #DCE6DA;
+  --or: #9A7A2E; --or-texte: #7A5F1F; --ligne: #CBD5C6; --rouge: #9B2C22; --rouge-fond: #F6E3DF; --orange: #8A5A00; --orange-fond: #FBEFD6;
+  --ok: #1F6B45; --ok-fond: #DDEBDF; --sur-vert: #F8FAF4; --ombre: 0 1px 2px rgba(20,40,31,.06), 0 6px 18px rgba(20,40,31,.07);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --fond: #0E1813; --surface: #15231C; --encre: #E8EEE5; --encre-2: #A9B9AE; --vert: #8FC1A6; --vert-clair: #1F3329;
+  --or: #CBA859; --or-texte: #D9B868; --ligne: #2B3E34; --rouge: #F0A196; --rouge-fond: #3A1D19; --orange: #F2C46D; --orange-fond: #3A2C12;
+  --ok: #8FD3AC; --ok-fond: #1C3326; --sur-vert: #0E1813; --ombre: 0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.25); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --fond: #0E1813; --surface: #15231C; --encre: #E8EEE5; --encre-2: #A9B9AE; --vert: #8FC1A6; --vert-clair: #1F3329;
+  --or: #CBA859; --or-texte: #D9B868; --ligne: #2B3E34; --rouge: #F0A196; --rouge-fond: #3A1D19; --orange: #F2C46D; --orange-fond: #3A2C12;
+  --ok: #8FD3AC; --ok-fond: #1C3326; --sur-vert: #0E1813; --ombre: 0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.25); color-scheme: dark; }
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--fond); color: var(--encre); font: 400 1rem/1.5 "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; overflow-x: hidden; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; color: var(--vert); line-height: 1.15; margin: 0; }
+h1 { font-size: 1.9rem; } h2 { font-size: 1.5rem; } h3 { font-size: 1.2rem; }
+a { color: var(--vert); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--or); outline-offset: 2px; border-radius: 6px; }
+[hidden] { display: none !important; }
+.contenu { max-width: 64rem; margin: 0 auto; padding: 1rem 16px 6.5rem; }
+
+/* Barre du haut */
+.barre { position: sticky; top: 0; z-index: 30; background: var(--vert); color: var(--sur-vert); }
+.barre .contenu { padding-top: .65rem; padding-bottom: .65rem; display: flex; align-items: center; gap: .75rem; }
+.barre .titre { flex: 1; min-width: 0; }
+.barre .titre b { display: block; font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.3rem; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.barre .titre small { opacity: .85; font-size: .78rem; }
+.barre button { background: transparent; border: 1px solid rgba(255,255,255,.35); color: inherit; border-radius: 10px; min-height: 2.5rem; padding: .35rem .7rem; font-size: .85rem; font-weight: 600; cursor: pointer; }
+:root[data-theme="dark"] .barre { background: #15231C; border-bottom: 1px solid var(--ligne); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .barre { background: #15231C; border-bottom: 1px solid var(--ligne); } }
+
+/* Onglets (barre du bas sur téléphone) */
+.onglets { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--ligne); display: grid; grid-template-columns: repeat(5, 1fr); padding-bottom: env(safe-area-inset-bottom); }
+.onglets button { background: none; border: 0; min-height: 3.9rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; font-size: .7rem; font-weight: 600; color: var(--encre-2); cursor: pointer; }
+.onglets button svg { width: 1.35rem; height: 1.35rem; }
+.onglets button[aria-current="page"] { color: var(--vert); }
+.onglets button[aria-current="page"] svg { stroke-width: 2.1; }
+@media (min-width: 900px) {
+  .onglets { position: sticky; top: 3.7rem; bottom: auto; max-width: 64rem; margin: 0 auto; grid-template-columns: repeat(5, auto); justify-content: start; gap: .25rem; border: 0; background: transparent; padding: .5rem 16px 0; }
+  .onglets button { flex-direction: row; min-height: 2.6rem; padding: 0 .9rem; border-radius: 999px; font-size: .9rem; gap: .45rem; }
+  .onglets button[aria-current="page"] { background: var(--vert-clair); }
+  .contenu { padding-bottom: 3rem; }
+}
+
+/* Cartes et grilles */
+.carte { background: var(--surface); border: 1px solid var(--ligne); border-radius: 16px; box-shadow: var(--ombre); padding: 1.1rem; margin-top: 1rem; }
+.carte > h2:first-child, .carte > h3:first-child { margin-bottom: .6rem; }
+.entete-section { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; margin-top: 1.2rem; }
+.grille-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .6rem; margin-top: 1rem; }
+.stat { background: var(--surface); border: 1px solid var(--ligne); border-radius: 14px; padding: .8rem .9rem; }
+.stat b { display: block; font-size: 1.7rem; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--vert); }
+.stat span { font-size: .82rem; color: var(--encre-2); font-weight: 500; }
+.stat.alerte b { color: var(--rouge); }
+table.donnees { width: 100%; border-collapse: collapse; font-size: .92rem; }
+table.donnees th, table.donnees td { text-align: left; padding: .55rem .4rem; border-bottom: 1px solid var(--ligne); vertical-align: top; }
+table.donnees th { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--encre-2); font-weight: 600; }
+table.donnees td.n { text-align: right; font-variant-numeric: tabular-nums; }
+.defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Boutons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; min-height: 2.75rem; padding: .5rem 1rem; border-radius: 11px; border: 1.5px solid var(--vert); background: transparent; color: var(--vert); font-weight: 600; font-size: .92rem; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.btn svg { width: 1.1rem; height: 1.1rem; flex: none; }
+.btn-plein { background: var(--vert); color: var(--sur-vert); }
+.btn-danger { border-color: var(--rouge); color: var(--rouge); }
+.btn-danger.btn-plein { background: var(--rouge); color: #fff; }
+.btn-petit { min-height: 2.35rem; padding: .3rem .7rem; font-size: .84rem; border-radius: 9px; }
+.btn-large { width: 100%; min-height: 3.1rem; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.lien { background: none; border: 0; padding: .2rem 0; color: var(--vert); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* Formulaires */
+.champ { display: grid; gap: .3rem; margin-top: .8rem; }
+.champ > label, .champ > .lib { font-weight: 600; font-size: .88rem; }
+.champ .aide { font-weight: 400; color: var(--encre-2); font-size: .82rem; }
+input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], input[type=datetime-local], input[type=url], input[type=search], select, textarea {
+  width: 100%; border: 1.5px solid var(--ligne); background: var(--surface); border-radius: 10px; padding: .6rem .75rem; min-height: 2.9rem; }
+textarea { min-height: 6rem; resize: vertical; }
+input:focus, select:focus, textarea:focus { border-color: var(--vert); outline: none; box-shadow: 0 0 0 3px var(--vert-clair); }
+.deux { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .7rem; }
+@media (min-width: 640px) { .trois { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 .7rem; } }
+.case { display: flex; align-items: center; gap: .6rem; min-height: 2.6rem; cursor: pointer; font-weight: 500; }
+.case input { width: 1.3rem; height: 1.3rem; accent-color: var(--vert); flex: none; }
+.cases { display: flex; flex-wrap: wrap; gap: 0 1.2rem; }
+
+/* Listes d'invités */
+.filtres { display: grid; grid-template-columns: 1fr; gap: .5rem; margin-top: .9rem; }
+@media (min-width: 640px) { .filtres { grid-template-columns: 2fr 1fr 1fr; } }
+.compte { font-size: .86rem; color: var(--encre-2); margin: .7rem 0 0; }
+.liste { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.invite { background: var(--surface); border: 1px solid var(--ligne); border-radius: 14px; padding: .8rem .9rem; display: grid; gap: .45rem; }
+.invite.annulee { opacity: .62; }
+.invite .ligne1 { display: flex; gap: .6rem; align-items: flex-start; justify-content: space-between; }
+.invite .nom { font-weight: 700; font-size: 1.02rem; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: var(--encre); overflow-wrap: anywhere; }
+.invite .meta { font-size: .84rem; color: var(--encre-2); display: flex; flex-wrap: wrap; gap: .2rem .8rem; }
+.badge { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+.b-a_envoyer { background: var(--orange-fond); color: var(--orange); }
+.b-envoyee { background: var(--vert-clair); color: var(--encre); }
+.b-confirmee { background: var(--ok-fond); color: var(--ok); }
+.b-partielle { background: var(--orange-fond); color: var(--orange); border-color: var(--orange); }
+.b-declinee, .b-annulee { background: var(--rouge-fond); color: var(--rouge); }
+.b-en_attente { background: var(--fond); color: var(--encre-2); border-color: var(--ligne); }
+.b-demo { background: var(--or); color: #fff; }
+.puces { display: flex; flex-wrap: wrap; gap: .35rem; }
+.puce { font-size: .76rem; font-weight: 600; padding: .18rem .5rem; border-radius: 8px; background: var(--fond); border: 1px solid var(--ligne); }
+.puce.oui { background: var(--ok-fond); color: var(--ok); border-color: transparent; }
+.puce.non { background: var(--rouge-fond); color: var(--rouge); border-color: transparent; }
+.puce.partiel { background: var(--orange-fond); color: var(--orange); border-color: transparent; }
+
+/* Alertes */
+.alertes { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.alertes li { padding: .6rem .8rem; border-radius: 10px; font-size: .9rem; border-left: 4px solid var(--orange); background: var(--orange-fond); }
+.alertes li.grave { border-color: var(--rouge); background: var(--rouge-fond); }
+.alertes li.ok { border-color: var(--ok); background: var(--ok-fond); }
+
+/* Plan de salle */
+.salle { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .7rem; margin-top: .8rem; }
+.table-carte { background: var(--surface); border: 1.5px solid var(--ligne); border-radius: 16px; padding: .8rem; display: grid; gap: .55rem; align-content: start; }
+.table-carte.plein { border-color: var(--ok); }
+.table-carte.depasse { border-color: var(--rouge); background: var(--rouge-fond); }
+.table-carte.cible { outline: 3px dashed var(--or); outline-offset: 2px; }
+.table-carte .tete { display: flex; align-items: center; gap: .6rem; }
+.rond { width: 3.1rem; height: 3.1rem; border-radius: 50%; display: grid; place-items: center; font-weight: 700; background: var(--vert-clair); color: var(--vert); flex: none; font-size: .95rem; position: relative; }
+.rond svg { position: absolute; inset: -3px; width: calc(100% + 6px); height: calc(100% + 6px); transform: rotate(-90deg); }
+.table-carte .tete .info { flex: 1; min-width: 0; }
+.table-carte .tete b { display: block; }
+.table-carte .tete small { color: var(--encre-2); font-size: .8rem; }
+.table-carte.depasse .tete small { color: var(--rouge); font-weight: 700; }
+.jetons { display: flex; flex-wrap: wrap; gap: .35rem; min-height: 2.2rem; }
+.jeton { border: 1px solid var(--ligne); background: var(--fond); border-radius: 10px; padding: .35rem .55rem; font-size: .84rem; font-weight: 600; cursor: grab; display: inline-flex; gap: .35rem; align-items: center; min-height: 2.3rem; }
+.jeton small { font-weight: 500; color: var(--encre-2); }
+.jeton.choisi { background: var(--vert); color: var(--sur-vert); border-color: var(--vert); }
+.jeton.choisi small { color: inherit; }
+.jeton.annule { text-decoration: line-through; opacity: .55; }
+.placer { display: none; }
+.mode-placement .placer { display: inline-flex; }
+.zone-sans-table { margin-top: .8rem; }
+.bandeau-placement { position: sticky; top: 3.6rem; z-index: 20; background: var(--or); color: #fff; padding: .6rem .9rem; border-radius: 12px; display: flex; gap: .6rem; align-items: center; justify-content: space-between; margin-top: .7rem; font-weight: 600; font-size: .9rem; }
+.bandeau-placement button { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.5); border-radius: 9px; min-height: 2.3rem; padding: 0 .7rem; font-weight: 600; cursor: pointer; }
+
+/* Fenêtres et notifications */
+dialog { border: 0; border-radius: 18px; padding: 0; width: min(36rem, calc(100vw - 24px)); max-height: calc(100vh - 32px); background: var(--surface); color: var(--encre); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+dialog::backdrop { background: rgba(10,20,15,.55); }
+.fen { display: flex; flex-direction: column; max-height: calc(100vh - 32px); }
+.fen-tete { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: 1rem 1.1rem .4rem; }
+.fen-corps { padding: 0 1.1rem 1rem; overflow-y: auto; }
+.fen-pied { padding: .8rem 1.1rem 1rem; border-top: 1px solid var(--ligne); display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; }
+.fermer { background: none; border: 0; width: 2.6rem; height: 2.6rem; border-radius: 50%; cursor: pointer; font-size: 1.4rem; color: var(--encre-2); }
+.message { padding: .7rem .85rem; border-radius: 10px; font-size: .9rem; margin-top: .8rem; }
+.message.erreur { background: var(--rouge-fond); color: var(--rouge); }
+.message.info { background: var(--vert-clair); }
+.message.attention { background: var(--orange-fond); color: var(--orange); }
+.message.ok { background: var(--ok-fond); color: var(--ok); }
+#toasts { position: fixed; left: 50%; bottom: 5rem; transform: translateX(-50%); z-index: 100; display: grid; gap: .4rem; width: min(30rem, calc(100vw - 24px)); }
+.toast { background: var(--encre); color: var(--fond); padding: .7rem .9rem; border-radius: 12px; font-size: .9rem; font-weight: 500; display: flex; gap: .7rem; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.toast.erreur { background: var(--rouge); color: #fff; }
+.toast button { background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 8px; min-height: 2.2rem; padding: 0 .65rem; font-weight: 700; cursor: pointer; }
+.code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82rem; background: var(--fond); border: 1px solid var(--ligne); border-radius: 8px; padding: .45rem .6rem; overflow-wrap: anywhere; display: block; }
+.apercu-import td.err { color: var(--rouge); font-weight: 600; }
+.apercu-import td.ok { color: var(--ok); font-weight: 600; }
+
+/* Connexion */
+.connexion { max-width: 26rem; margin: 9vh auto 0; padding: 0 16px; }
+.connexion .marque { text-align: center; margin-bottom: 1.2rem; }
+.connexion .marque p { margin: .3rem 0 0; color: var(--encre-2); }
+.chargement { text-align: center; padding: 4rem 1rem; color: var(--encre-2); }
+</style>
+</head>
+<body>
+
+<!-- ===== Connexion ===== -->
+<section id="ecran-connexion" hidden>
+  <div class="connexion">
+    <div class="marque"><h1>Administration</h1><p>Invitations de mariage — accès réservé</p></div>
+    <div class="carte">
+      <form id="form-email">
+        <div class="champ" style="margin-top:0"><label for="email">Votre adresse e-mail</label>
+          <input type="email" id="email" autocomplete="email" required placeholder="nom@exemple.com"></div>
+        <button class="btn btn-plein btn-large" style="margin-top:1rem" type="submit">Recevoir le lien de connexion</button>
+      </form>
+      <form id="form-code" hidden>
+        <div class="message info" id="msg-envoye"></div>
+        <div class="champ"><label for="code">Ou saisissez le code reçu <span class="aide">(si l'e-mail en contient un)</span></label>
+          <input type="text" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"></div>
+        <button class="btn btn-plein btn-large" style="margin-top:1rem" type="submit">Valider le code</button>
+        <button class="lien" type="button" id="autre-email" style="margin-top:.8rem">Utiliser une autre adresse</button>
+      </form>
+      <div class="message erreur" id="msg-connexion" hidden></div>
+    </div>
+    <p class="compte" style="text-align:center">Ouvrez le lien sur ce même téléphone, dans ce même navigateur.</p>
+  </div>
+</section>
+
+<!-- ===== Application ===== -->
+<header class="barre" id="barre" hidden>
+  <div class="contenu">
+    <div class="titre"><b id="barre-titre">Administration</b><small id="barre-sous"></small></div>
+    <button type="button" id="btn-mariages">Mariages</button>
+  </div>
+</header>
+<nav class="onglets" id="onglets" hidden aria-label="Sections">
+  <button type="button" data-onglet="apercu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Aperçu</button>
+  <button type="button" data-onglet="invites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-5.8 6-5.8s6 2.2 6 5.8M16 4.9a3.1 3.1 0 0 1 0 6.1M18 14.4c1.9.6 3 2.5 3 5.6"/></svg>Invités</button>
+  <button type="button" data-onglet="salle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg>Salle</button>
+  <button type="button" data-onglet="programme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Programme</button>
+  <button type="button" data-onglet="reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Réglages</button>
+</nav>
+<main class="contenu" id="vue"><div class="chargement">Chargement…</div></main>
+
+<dialog id="fenetre"><div class="fen" id="fenetre-contenu"></div></dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function () {
+'use strict';
+var CFG = window.CONFIG;
+
+/* =====================================================================
+   1. UTILITAIRES
+   ===================================================================== */
+function $(s, e) { return (e || document).querySelector(s); }
+function $$(s, e) { return Array.prototype.slice.call((e || document).querySelectorAll(s)); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+// Même règle que la fonction SQL normaliser() : minuscules, sans accents, sans ponctuation
+function norm(t) { return String(t || '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+var stock = {
+  lire: function (k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  ecrire: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  effacer: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+function pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
+function fmtDate(iso) { if (!iso) return 'Date à définir'; var s = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso + 'T12:00:00Z')); return s.charAt(0).toUpperCase() + s.slice(1); }
+function fmtDH(iso) { if (!iso) return 'Heure à définir'; return new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: CFG.FUSEAU }).format(new Date(iso)); }
+function versChampLocal(iso) { // ISO → "AAAA-MM-JJTHH:MM" à l'heure de Lubumbashi
+  if (!iso) return '';
+  var p = {}; new Intl.DateTimeFormat('en-CA', { timeZone: CFG.FUSEAU, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso)).forEach(function (x) { p[x.type] = x.value; });
+  return p.year + '-' + p.month + '-' + p.day + 'T' + p.hour + ':' + p.minute;
+}
+function depuisChampLocal(v) { return v ? v + ':00' + CFG.DECALAGE : null; }
+// Téléphone : garde chiffres et +, convertit 0XXXXXXXXX en +243XXXXXXXXX
+function normTel(t) {
+  var s = String(t || '').replace(/[^0-9+]/g, '');
+  if (!s) return '';
+  if (s.indexOf('00') === 0) s = '+' + s.slice(2);
+  if (s.charAt(0) === '0') s = '+' + CFG.INDICATIF + s.slice(1);
+  if (s.charAt(0) !== '+' && s.length >= 11) s = '+' + s;
+  return s;
+}
+function telValide(t) { return /^\+[0-9]{9,15}$/.test(t); }
+function lienWa(num, texte) { var n = String(num || '').replace(/[^0-9]/g, ''); return 'https://wa.me/' + n + '?text=' + encodeURIComponent(texte); }
+function lienInvite(i) { return location.origin + location.pathname.replace(/admin\.html$/, '').replace(/\/?$/, '/') + '?i=' + i.code; }
+function copier(texte) {
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(texte).then(function () { toast('Lien copié'); }, function () { copierSecours(texte); });
+  copierSecours(texte);
+}
+function copierSecours(texte) { var t = document.createElement('textarea'); t.value = texte; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); toast('Lien copié'); } catch (e) { toast('Copie impossible : ' + texte, { erreur: true }); } t.remove(); }
+function telecharger(nom, contenu, type) {
+  var b = new Blob([contenu], { type: type }); var a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = nom; document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+var ICO = {
+  wa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1.2-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.2c0 3 2.6 5.8 5.8 5.8l1.2-1.4-1.9-1-.9.9c-1-.4-2.2-1.6-2.6-2.6l.9-.9-1-1.9z"/></svg>',
+  lien: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  maj: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></svg>'
+};
+
+/* ---------- Notifications et fenêtres ---------- */
+function toast(msg, o) {
+  o = o || {};
+  var d = document.createElement('div'); d.className = 'toast' + (o.erreur ? ' erreur' : ''); d.setAttribute('role', o.erreur ? 'alert' : 'status');
+  d.innerHTML = '<span>' + esc(msg) + '</span>' + (o.annuler ? '<button type="button">Annuler</button>' : '');
+  $('#toasts').appendChild(d);
+  while ($('#toasts').children.length > 2) $('#toasts').firstChild.remove();   // 2 notifications au maximum
+  var fini = false, fin = function () { if (!fini) { fini = true; d.remove(); } };
+  if (o.annuler) $('button', d).addEventListener('click', function () { fin(); o.annuler(); });
+  setTimeout(fin, o.duree || (o.annuler ? 8000 : o.erreur ? 7000 : 3200));
+}
+var FEN = $('#fenetre');
+function ouvrir(titre, corps, pied) {
+  $('#fenetre-contenu').innerHTML = '<div class="fen-tete"><h2>' + esc(titre) + '</h2><button class="fermer" type="button" aria-label="Fermer">×</button></div>' +
+    '<div class="fen-corps">' + corps + '</div>' + (pied ? '<div class="fen-pied">' + pied + '</div>' : '');
+  $('.fermer', FEN).addEventListener('click', fermer);
+  if (!FEN.open) FEN.showModal();
+  return $('#fenetre-contenu');
+}
+function fermer() { if (FEN.open) FEN.close(); }
+FEN.addEventListener('cancel', function () { /* Échap ferme */ });
+// Confirmation : dit exactement ce qui va se passer. Renvoie une promesse booléenne.
+function confirmer(titre, html, libelle, danger) {
+  return new Promise(function (ok) {
+    var dlg = document.createElement('dialog');
+    dlg.innerHTML = '<div class="fen"><div class="fen-tete"><h2>' + esc(titre) + '</h2></div><div class="fen-corps">' + html + '</div>' +
+      '<div class="fen-pied"><button class="btn" type="button" data-r="0">Annuler</button><button class="btn btn-plein' + (danger ? ' btn-danger' : '') + '" type="button" data-r="1">' + esc(libelle || 'Confirmer') + '</button></div></div>';
+    document.body.appendChild(dlg); dlg.showModal();
+    var rep = false;
+    $$('button', dlg).forEach(function (b) { b.addEventListener('click', function () { rep = b.getAttribute('data-r') === '1'; dlg.close(); }); });
+    dlg.addEventListener('close', function () { dlg.remove(); ok(rep); });
+  });
+}
+
+/* =====================================================================
+   2. CONNEXION (Supabase Auth, lien magique ou code) ET ACCÈS AUX DONNÉES
+   ===================================================================== */
+var CLE_SESSION = 'admin-session';
+function session() { return stock.lire(CLE_SESSION); }
+function garderSession(s) {
+  stock.ecrire(CLE_SESSION, { access_token: s.access_token, refresh_token: s.refresh_token,
+    expires_at: s.expires_at || Math.floor(Date.now() / 1000) + Number(s.expires_in || 3600), email: s.user && s.user.email || (session() || {}).email });
+}
+function authFetch(chemin, corps, jeton) {
+  var h = { 'apikey': CFG.CLE_PUBLIQUE, 'Content-Type': 'application/json' };
+  if (jeton) h.Authorization = 'Bearer ' + jeton;
+  return fetch(CFG.SUPABASE_URL + '/auth/v1/' + chemin, { method: corps ? 'POST' : 'GET', headers: h, body: corps ? JSON.stringify(corps) : undefined })
+    .then(function (r) { return r.text().then(function (t) { var j = {}; try { j = t ? JSON.parse(t) : {}; } catch (e) {} if (!r.ok) { var e2 = new Error(j.msg || j.error_description || j.message || ('Erreur ' + r.status)); e2.status = r.status; throw e2; } return j; }); });
+}
+var rafraichissement = null;
+function rafraichir() {
+  var s = session(); if (!s) return Promise.reject(new Error('session'));
+  if (!rafraichissement) rafraichissement = authFetch('token?grant_type=refresh_token', { refresh_token: s.refresh_token })
+    .then(function (n) { garderSession(n); rafraichissement = null; return n.access_token; }, function (e) { rafraichissement = null; throw e; });
+  return rafraichissement;
+}
+function jeton() {
+  var s = session(); if (!s) return Promise.reject(new Error('session'));
+  if ((s.expires_at || 0) - 60 < Date.now() / 1000) return rafraichir();
+  return Promise.resolve(s.access_token);
+}
+// Appel REST/RPC avec la session de l'utilisateur (le RLS de la base s'applique).
+function api(chemin, o, dejaReessaye) {
+  o = o || {};
+  return jeton().then(function (j) {
+    var h = { 'apikey': CFG.CLE_PUBLIQUE, 'Authorization': 'Bearer ' + j, 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (o.methode && o.methode !== 'GET') h.Prefer = 'return=representation';
+    return fetch(CFG.SUPABASE_URL + '/rest/v1/' + chemin, { method: o.methode || 'GET', headers: h, body: o.corps !== undefined ? JSON.stringify(o.corps) : undefined, cache: 'no-store' });
+  }).then(function (r) {
+    if (r.status === 401 && !dejaReessaye) return rafraichir().then(function () { return api(chemin, o, true); });
+    return r.text().then(function (t) {
+      var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {}
+      if (!r.ok) { var e = new Error((j && j.message) || ('Erreur ' + r.status)); e.code = j && j.code; e.status = r.status; throw e; }
+      return j;
+    });
+  }, function (e) { if (e.message === 'session') throw e; var e2 = new Error('Connexion impossible. Vérifiez le réseau puis réessayez.'); e2.reseau = true; throw e2; });
+}
+function rpc(fn, args) { return api('rpc/' + fn, { methode: 'POST', corps: args || {} }); }
+function filtre(champs) { return Object.keys(champs).map(function (k) { return k + '=eq.' + encodeURIComponent(champs[k]); }).join('&'); }
+function inserer(table, lignes) { return api(table, { methode: 'POST', corps: lignes }); }
+function modifier(table, f, champs) { return api(table + '?' + filtre(f), { methode: 'PATCH', corps: champs }); }
+function supprimer(table, f) { return api(table + '?' + filtre(f), { methode: 'DELETE' }); }
+function messageErreur(e) {
+  var m = (e && e.message) || '';
+  if (e && e.code === '23505') return /Doublon/.test(m) ? m : 'Ce nom existe déjà (doublon). Précisez-le, par exemple « Couple Manu (famille 2) ».';
+  if (e && e.code === '23514') return 'Valeur refusée : vérifiez le téléphone (chiffres seulement, 8 à 20) et les nombres de personnes.';
+  if (e && (e.code === '42501' || /Accès refusé|autoris/.test(m))) return /autoris/.test(m) ? m : 'Action non autorisée pour votre rôle.';
+  return m || 'Erreur inattendue.';
+}
+function echec(e) { if (e && e.message === 'session') return afficherConnexion(); toast(messageErreur(e), { erreur: true }); throw e; }
+
+/* =====================================================================
+   3. ÉTAT
+   ===================================================================== */
+var S = { mariages: [], m: null, role: null, ev: [], tables: [], invites: [], rep: {}, onglet: 'apercu', filtres: { q: '', statut: '', table: '' }, choisi: null, membres: null };
+var GROUPES = { famille_1: null, famille_2: null, amis: 'Amis', collegues: 'Collègues', eglise: 'Église', autres: 'Autres' };
+function nomGroupe(g) { if (g === 'famille_1') return 'Famille de ' + (S.m ? S.m.marie_1 : '1'); if (g === 'famille_2') return 'Famille de ' + (S.m ? S.m.marie_2 : '2'); return GROUPES[g] || g; }
+var STATUTS = { a_envoyer: 'À envoyer', envoyee: 'Envoyée', confirmee: 'Confirmée', partielle: 'Partielle', declinee: 'Déclinée', annulee: 'Annulée', en_attente: "Liste d'attente" };
+var TYPES = { civil: 'Cérémonie civile', religieux: 'Cérémonie religieuse', soiree: 'Soirée', autre: 'Autre' };
+function gestion() { return S.role === 'admin' || S.role === 'organisateur'; }
+function admin() { return S.role === 'admin'; }
+function pers(i) { return i.adultes + i.enfants; }
+function compte(i) { return i.statut !== 'annulee'; }           // compte dans les places
+function reel(i) { return i.statut !== 'annulee' && !i.demo; }  // compte dans les statistiques
+function tableDe(id) { return S.tables.filter(function (t) { return t.id === id; })[0] || null; }
+function evDe(id) { return S.ev.filter(function (e) { return e.id === id; })[0] || null; }
+function soiree() { return S.ev.filter(function (e) { return e.type === 'soiree'; })[0] || S.ev[S.ev.length - 1] || null; }
+function occupation(t) {
+  var dans = S.invites.filter(function (i) { return i.table_id === t.id && compte(i); });
+  var prevues = dans.reduce(function (s, i) { return s + pers(i); }, 0);
+  var so = soiree(), conf = dans.reduce(function (s, i) { var r = so && S.rep[i.id] && S.rep[i.id][so.id]; return s + (r && r.present ? r.nb_personnes : 0); }, 0);
+  return { invites: dans, prevues: prevues, confirmees: conf, depasse: prevues > t.capacite };
+}
+
+function chargerMariages() {
+  return rpc('mes_mariages').then(function (l) { S.mariages = l || []; });
+}
+function chargerDonnees() {
+  return rpc('admin_donnees', { p_mariage: S.m.id }).then(function (d) {
+    if (!d || !d.mariage) throw new Error('Mariage introuvable ou accès retiré.');
+    S.m = d.mariage; S.role = d.role; S.ev = d.evenements; S.tables = d.tables; S.invites = d.invites; S.rep = {};
+    d.reponses.forEach(function (r) { (S.rep[r.invite_id] = S.rep[r.invite_id] || {})[r.evenement_id] = r; });
+    S.chargeLe = new Date();
+  });
+}
+function recharger() { return chargerDonnees().then(rendre).catch(echec); }
+
+/* =====================================================================
+   4. ÉCRANS
+   ===================================================================== */
+function afficherConnexion(msg) {
+  stock.effacer(CLE_SESSION);
+  $('#barre').hidden = true; $('#onglets').hidden = true; $('#vue').hidden = true; $('#ecran-connexion').hidden = false;
+  $('#form-email').hidden = false; $('#form-code').hidden = true; $('#code').value = '';
+  var m = $('#msg-connexion'); m.hidden = !msg; m.textContent = msg || '';
+}
+function afficherApp() { $('#ecran-connexion').hidden = true; $('#barre').hidden = false; $('#vue').hidden = false; }
+
+function ecranMariages() {
+  S.m = null; afficherApp(); $('#onglets').hidden = true;
+  $('#barre-titre').textContent = 'Mes mariages'; $('#barre-sous').textContent = (session() || {}).email || ''; $('#btn-mariages').textContent = 'Déconnexion';
+  var h = '<div class="entete-section"><h1>Mes mariages</h1>' + (S.peutCreer ? '<button class="btn btn-plein" id="nouveau-mariage" type="button">' + ICO.plus + 'Nouveau mariage</button>' : '') + '</div>';
+  if (!S.mariages.length) {
+    h += '<div class="carte"><p style="margin:0">Aucun mariage pour ce compte.</p><p class="compte">' +
+         (S.peutCreer ? 'Créez votre premier mariage avec le bouton ci-dessus.' : 'Demandez à l\'administrateur du mariage de vous ajouter avec l\'adresse <b>' + esc((session() || {}).email || '') + '</b>.') + '</p></div>';
+  }
+  h += '<ul class="liste">' + S.mariages.map(function (m) {
+    return '<li class="invite"><div class="ligne1"><button class="nom" type="button" data-m="' + esc(m.id) + '">' + esc(m.marie_1 + ' & ' + m.marie_2) + '</button><span class="badge b-envoyee">' + esc({ admin: 'Administrateur', organisateur: 'Organisateur', hote: 'Hôte' }[m.role]) + '</span></div>' +
+           '<div class="meta"><span>' + esc(fmtDate(m.date)) + '</span>' + (m.ville ? '<span>' + esc(m.ville) + '</span>' : '') + '</div></li>';
+  }).join('') + '</ul>';
+  $('#vue').innerHTML = h;
+  $$('[data-m]').forEach(function (b) { b.addEventListener('click', function () { ouvrirMariage(b.getAttribute('data-m')); }); });
+  var n = $('#nouveau-mariage'); if (n) n.addEventListener('click', formNouveauMariage);
+}
+
+function ouvrirMariage(id) {
+  S.m = { id: id }; stock.ecrire('admin-mariage', id);
+  $('#vue').innerHTML = '<div class="chargement">Chargement…</div>';
+  chargerDonnees().then(function () { S.onglet = S.role === 'hote' ? 'apercu' : (S.onglet || 'apercu'); rendre(); }).catch(function (e) { echec(e); });
+}
+
+function rendre() {
+  if (!S.m) return ecranMariages();
+  afficherApp(); $('#onglets').hidden = false; $('#btn-mariages').textContent = 'Mariages';
+  $('#barre-titre').textContent = S.m.marie_1 + ' & ' + S.m.marie_2;
+  $('#barre-sous').textContent = fmtDate(S.m.date_mariage) + ' · ' + ({ admin: 'Administrateur', organisateur: 'Organisateur', hote: "Hôte d'accueil" }[S.role] || '');
+  $$('#onglets button').forEach(function (b) { b.setAttribute('aria-current', b.getAttribute('data-onglet') === S.onglet ? 'page' : 'false'); b.hidden = S.role === 'hote' && ['invites', 'salle', 'reglages'].indexOf(b.getAttribute('data-onglet')) >= 0; });
+  ({ apercu: vueApercu, invites: vueInvites, salle: vueSalle, programme: vueProgramme, reglages: vueReglages })[S.onglet]();
+}
+
+/* ---------- 4.1 Aperçu ---------- */
+function vueApercu() {
+  if (S.role === 'hote') {
+    $('#vue').innerHTML = '<div class="carte"><h2>Bienvenue</h2><p>Votre rôle est <b>hôte d\'accueil</b>. L\'écran d\'accueil du jour J (scan des QR codes, recherche par nom) sera ajouté à l\'étape E.</p><p class="compte">Pour protéger les invités, les hôtes ne voient jamais les numéros de téléphone.</p></div>';
+    return;
+  }
+  var reels = S.invites.filter(reel), annules = S.invites.filter(function (i) { return i.statut === 'annulee'; });
+  var somme = function (l, f) { return l.reduce(function (s, i) { return s + f(i); }, 0); };
+  var nbStat = function (st) { return reels.filter(function (i) { return i.statut === st; }).length; };
+  var sansTable = reels.filter(function (i) { return !i.table_id; }), sansTel = reels.filter(function (i) { return !i.telephone && !(i.via_relais && S.m.whatsapp_relais); });
+  var regimes = reels.filter(function (i) { return i.regimes || S.ev.some(function (e) { var r = S.rep[i.id] && S.rep[i.id][e.id]; return r && r.regimes; }); });
+  var places = somme(S.tables, function (t) { return t.capacite; });
+
+  var h = '<div class="entete-section"><h1>Aperçu</h1><div class="actions">' +
+          '<button class="btn btn-petit" id="actualiser" type="button">' + ICO.maj + 'Actualiser</button>' +
+          '<button class="btn btn-petit btn-plein" id="appliquer" type="button">Appliquer aux statuts</button></div></div>';
+  h += '<p class="compte">Données du ' + esc(new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'medium', timeZone: CFG.FUSEAU }).format(S.chargeLe)) + '. « Appliquer aux statuts » met à jour Confirmée / Partielle / Déclinée d\'après les dernières réponses.</p>';
+  h += '<div class="grille-stats">' +
+    stat(reels.length, 'invitations') + stat(somme(reels, pers), 'personnes invitées') +
+    stat(somme(reels, function (i) { return i.adultes; }), 'adultes') + stat(somme(reels, function (i) { return i.enfants; }), 'enfants') +
+    stat(nbStat('confirmee'), 'confirmées') + stat(nbStat('partielle'), 'partielles (ex. 1 sur 2)') + stat(nbStat('declinee'), 'déclinées') +
+    stat(nbStat('a_envoyer'), 'à envoyer') + stat(nbStat('envoyee'), 'envoyées sans réponse') + stat(annules.length, 'annulées') +
+    stat(sansTable.length, 'sans table', sansTable.length > 0) + stat(sansTel.length, 'sans téléphone ni relais', sansTel.length > 0) +
+    stat(regimes.length, 'régimes / allergies') + stat(somme(reels.filter(function (i) { return i.table_id; }), pers) + ' / ' + places, 'places occupées') + '</div>';
+
+  // Par événement
+  h += '<div class="carte"><h2>Réponses par événement</h2><div class="defile"><table class="donnees"><thead><tr><th>Événement</th><th class="n">Invités</th><th class="n">Présents</th><th class="n">Absents</th><th class="n">Sans réponse</th></tr></thead><tbody>';
+  S.ev.forEach(function (e) {
+    var conv = reels.filter(function (i) { return i.evenements.indexOf(e.id) >= 0; });
+    var pres = 0, abs = 0, sans = 0;
+    conv.forEach(function (i) { var r = S.rep[i.id] && S.rep[i.id][e.id]; if (!r) sans += pers(i); else if (r.present) { pres += r.nb_personnes; abs += pers(i) - r.nb_personnes; } else abs += pers(i); });
+    h += '<tr><td>' + esc(e.titre) + '</td><td class="n">' + somme(conv, pers) + '</td><td class="n"><b>' + pres + '</b></td><td class="n">' + abs + '</td><td class="n">' + sans + '</td></tr>';
+  });
+  if (!S.ev.length) h += '<tr><td colspan="5">Aucun événement. Ajoutez-les dans l\'onglet Programme.</td></tr>';
+  h += '</tbody></table></div><p class="compte">En personnes. Un couple qui répond « 1 sur 2 » compte 1 présent et 1 absent.</p></div>';
+
+  // Alertes
+  h += '<div class="carte"><h2>Points à vérifier</h2><ul class="alertes">' + alertes().map(function (a) { return '<li class="' + a.niv + '">' + a.html + '</li>'; }).join('') + '</ul></div>';
+  $('#vue').innerHTML = h;
+  $('#actualiser').addEventListener('click', function () { recharger().then(function () { toast('Données actualisées'); }); });
+  $('#appliquer').addEventListener('click', function () {
+    var b = this; b.disabled = true;
+    rpc('appliquer_reponses', { p_mariage: S.m.id }).then(function (r) { toast(pluriel(r.mis_a_jour, 'statut mis à jour', 'statuts mis à jour')); return recharger(); }).catch(echec).finally(function () { b.disabled = false; });
+  });
+  $$('[data-voir]').forEach(function (b) { b.addEventListener('click', function () { formInvite(b.getAttribute('data-voir')); }); });
+}
+function stat(v, lib, alerte) { return '<div class="stat' + (alerte ? ' alerte' : '') + '"><b>' + esc(v) + '</b><span>' + esc(lib) + '</span></div>'; }
+function lienVoir(i) { return '<button class="lien" type="button" data-voir="' + esc(i.id) + '">' + esc(i.nom) + '</button>'; }
+function alertes() {
+  var l = [], reels = S.invites.filter(reel);
+  S.tables.forEach(function (t) { var o = occupation(t); if (o.depasse) l.push({ niv: 'grave', html: '<b>' + esc(t.nom.match(/^\d/) ? 'Table ' + t.nom : t.nom) + '</b> : ' + o.prevues + ' personnes pour ' + t.capacite + ' places (dépassement de ' + (o.prevues - t.capacite) + ').' }); });
+  var st = reels.filter(function (i) { return !i.table_id; });
+  if (st.length) l.push({ niv: '', html: '<b>' + pluriel(st.length, 'invitation sans table', 'invitations sans table') + '</b> : ' + st.slice(0, 8).map(lienVoir).join(', ') + (st.length > 8 ? '…' : '') });
+  var stel = reels.filter(function (i) { return !i.telephone && !i.via_relais; });
+  if (stel.length) l.push({ niv: '', html: '<b>' + pluriel(stel.length, 'invité sans téléphone', 'invités sans téléphone') + '</b> (ni relais coché) : ' + stel.slice(0, 8).map(lienVoir).join(', ') + (stel.length > 8 ? '…' : '') });
+  if (reels.some(function (i) { return i.via_relais || !i.telephone; }) && !S.m.whatsapp_relais) l.push({ niv: 'grave', html: 'Des invités passent par le <b>relais</b>, mais aucun numéro relais n\'est enregistré (Réglages).' });
+  var part = [];
+  reels.forEach(function (i) { S.ev.forEach(function (e) { var r = S.rep[i.id] && S.rep[i.id][e.id]; if (r && r.present && r.nb_personnes < pers(i)) part.push({ i: i, e: e, r: r }); }); });
+  if (part.length) l.push({ niv: '', html: '<b>Présences partielles</b> : ' + part.slice(0, 10).map(function (p) { return lienVoir(p.i) + ' (' + esc(p.e.titre) + ' : ' + p.r.nb_personnes + ' sur ' + pers(p.i) + ')'; }).join(', ') + (part.length > 10 ? '…' : '') });
+  var sansEv = reels.filter(function (i) { return !i.evenements.length; });
+  if (sansEv.length) l.push({ niv: 'grave', html: '<b>Invités sans aucun événement</b> (leur invitation n\'affiche pas de programme) : ' + sansEv.slice(0, 8).map(lienVoir).join(', ') });
+  var noms = {}; S.invites.filter(compte).forEach(function (i) { var k = norm(i.nom).replace(/\b(couple|famille|mr|mme|m|madame|monsieur|et)\b/g, '').replace(/\s+/g, ' ').trim(); (noms[k] = noms[k] || []).push(i); });
+  Object.keys(noms).forEach(function (k) { if (k && noms[k].length > 1) l.push({ niv: '', html: '<b>Noms très proches</b> (doublon possible) : ' + noms[k].map(lienVoir).join(' / ') }); });
+  if (!S.m.date_mariage) l.push({ niv: '', html: 'La <b>date du mariage</b> n\'est pas encore fixée : les invitations affichent « Date à confirmer ».' });
+  if (!S.ev.length) l.push({ niv: 'grave', html: 'Aucun <b>événement</b> au programme.' });
+  if (!l.length) l.push({ niv: 'ok', html: 'Rien à signaler.' });
+  return l;
+}
+
+/* ---------- 4.2 Invités ---------- */
+function vueInvites() {
+  var f = S.filtres;
+  var h = '<div class="entete-section"><h1>Invités</h1><div class="actions">' +
+          '<button class="btn btn-petit" id="importer" type="button">Importer une liste</button>' +
+          '<button class="btn btn-petit btn-plein" id="ajouter" type="button">' + ICO.plus + 'Ajouter</button></div></div>';
+  h += '<div class="filtres"><input type="search" id="f-q" placeholder="Rechercher un nom…" value="' + esc(f.q) + '" aria-label="Rechercher">' +
+       '<select id="f-statut" aria-label="Statut"><option value="">Tous les statuts</option>' + Object.keys(STATUTS).map(function (k) { return '<option value="' + k + '"' + (f.statut === k ? ' selected' : '') + '>' + STATUTS[k] + '</option>'; }).join('') + '<option value="sans_reponse"' + (f.statut === 'sans_reponse' ? ' selected' : '') + '>Sans réponse</option><option value="demo"' + (f.statut === 'demo' ? ' selected' : '') + '>Démonstration</option></select>' +
+       '<select id="f-table" aria-label="Table"><option value="">Toutes les tables</option><option value="aucune"' + (f.table === 'aucune' ? ' selected' : '') + '>Sans table</option>' + S.tables.map(function (t) { return '<option value="' + esc(t.id) + '"' + (f.table === t.id ? ' selected' : '') + '>' + esc(nomTable(t)) + '</option>'; }).join('') + '</select></div>';
+  h += '<p class="compte" id="compte-invites"></p><ul class="liste" id="liste-invites"></ul>';
+  $('#vue').innerHTML = h;
+  $('#ajouter').addEventListener('click', function () { formInvite(null); });
+  $('#importer').addEventListener('click', formImport);
+  $('#f-q').addEventListener('input', function (e) { f.q = e.target.value; listeInvites(); });
+  $('#f-statut').addEventListener('change', function (e) { f.statut = e.target.value; listeInvites(); });
+  $('#f-table').addEventListener('change', function (e) { f.table = e.target.value; listeInvites(); });
+  listeInvites();
+}
+function nomTable(t) { return /^\d+$/.test(t.nom) ? 'Table ' + t.nom : t.nom; }
+function listeInvites() {
+  var f = S.filtres, q = norm(f.q);
+  var l = S.invites.filter(function (i) {
+    if (q && norm(i.nom).indexOf(q) < 0 && String(i.telephone || '').replace(/\D/g, '').indexOf(q.replace(/\D/g, '') || '§') < 0) return false;
+    if (f.statut === 'sans_reponse') { if (!reel(i) || (S.rep[i.id] && Object.keys(S.rep[i.id]).length)) return false; }
+    else if (f.statut === 'demo') { if (!i.demo) return false; }
+    else if (f.statut && i.statut !== f.statut) return false;
+    if (f.table === 'aucune' && i.table_id) return false;
+    if (f.table && f.table !== 'aucune' && i.table_id !== f.table) return false;
+    return true;
+  });
+  var p = l.filter(compte).reduce(function (s, i) { return s + pers(i); }, 0);
+  $('#compte-invites').textContent = pluriel(l.length, 'invitation', 'invitations') + ' · ' + pluriel(p, 'personne', 'personnes') + (l.length !== S.invites.length ? ' (filtré sur ' + S.invites.length + ')' : '');
+  $('#liste-invites').innerHTML = l.length ? l.map(carteInvite).join('') : '<li class="carte">' + (S.invites.length ? 'Aucun invité ne correspond.' : 'Aucun invité pour l\'instant. Ajoutez-en un, ou importez une liste « Nom ; numéro ».') + '</li>';
+  $$('#liste-invites [data-act]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var i = S.invites.filter(function (x) { return x.id === b.getAttribute('data-id'); })[0], a = b.getAttribute('data-act');
+      if (a === 'voir') formInvite(i.id); else if (a === 'lien') copier(lienInvite(i)); else if (a === 'wa') envoyerWa(i);
+    });
+  });
+}
+function carteInvite(i) {
+  var t = tableDe(i.table_id);
+  var puces = S.ev.filter(function (e) { return i.evenements.indexOf(e.id) >= 0; }).map(function (e) {
+    var r = S.rep[i.id] && S.rep[i.id][e.id], cls = '', txt = '—';
+    if (r) { if (!r.present) { cls = 'non'; txt = '✗'; } else { cls = r.nb_personnes < pers(i) ? 'partiel' : 'oui'; txt = '✓ ' + r.nb_personnes + (pers(i) > 1 ? '/' + pers(i) : ''); } }
+    return '<span class="puce ' + cls + '" title="' + esc(e.titre) + '">' + esc(({ civil: 'Civil', religieux: 'Religieux', soiree: 'Soirée' })[e.type] || e.titre.split(' ')[0]) + ' ' + txt + '</span>';
+  }).join('');
+  var cible = (i.via_relais || !i.telephone) ? 'relais' : '';
+  return '<li class="invite' + (i.statut === 'annulee' ? ' annulee' : '') + '">' +
+    '<div class="ligne1"><button class="nom" type="button" data-act="voir" data-id="' + esc(i.id) + '">' + esc(i.nom) + '</button>' +
+    '<span>' + (i.demo ? '<span class="badge b-demo">Démo</span> ' : '') + '<span class="badge b-' + i.statut + '">' + esc(STATUTS[i.statut]) + '</span></span></div>' +
+    '<div class="meta"><span>' + pluriel(pers(i), 'pers.', 'pers.') + (i.enfants ? ' (' + i.enfants + ' enf.)' : '') + '</span><span>' + esc(t ? nomTable(t) : 'Sans table') + '</span><span>' + esc(nomGroupe(i.groupe)) + '</span>' +
+    (i.telephone ? '<span>' + esc(i.telephone) + '</span>' : '<span>' + (i.via_relais ? 'Via relais' : 'Sans téléphone') + '</span>') + '</div>' +
+    (puces ? '<div class="puces">' + puces + '</div>' : '') +
+    (i.statut !== 'annulee' ? '<div class="actions"><button class="btn btn-petit" type="button" data-act="wa" data-id="' + esc(i.id) + '">' + ICO.wa + (cible ? 'Envoyer au relais' : 'WhatsApp') + '</button>' +
+    '<button class="btn btn-petit" type="button" data-act="lien" data-id="' + esc(i.id) + '">' + ICO.lien + 'Copier le lien</button></div>' : '') + '</li>';
+}
+
+/* ---------- Envoi WhatsApp ---------- */
+function texteInvitation(i) {
+  var d = S.m.date_mariage ? ' le ' + fmtDate(S.m.date_mariage).toLowerCase() : '';
+  return 'Bonjour ' + i.nom + ',\n\n' + S.m.marie_1 + ' & ' + S.m.marie_2 + ' ont la joie de vous inviter à leur mariage' + d + (S.m.ville ? ' à ' + S.m.ville : '') + '.\n\n' +
+         'Votre invitation personnelle (' + pluriel(pers(i), 'personne', 'personnes') + ') :\n' + lienInvite(i) + '\n\nMerci de nous répondre directement sur la page. Elle contient aussi votre QR code d\'entrée.';
+}
+function envoyerWa(i) {
+  var relais = i.via_relais || !i.telephone;
+  var num = relais ? S.m.whatsapp_relais : i.telephone;
+  if (!num) { toast(relais ? 'Aucun numéro relais enregistré (onglet Réglages).' : 'Pas de numéro pour cet invité.', { erreur: true }); return; }
+  var txt = relais ? 'Bonjour, voici l\'invitation de ' + i.nom + ', à lui transmettre s\'il vous plaît :\n\n' + texteInvitation(i) : texteInvitation(i);
+  window.open(lienWa(num, txt), '_blank', 'noopener');    // ouvert d'abord (sinon bloqué par le navigateur)
+  marquerEnvoyees([i]);
+}
+function marquerEnvoyees(liste) {
+  var maintenant = new Date().toISOString();
+  return Promise.all(liste.map(function (i) {
+    var champs = { envoye_le: i.envoye_le || maintenant }; if (i.statut === 'a_envoyer') champs.statut = 'envoyee';
+    return modifier('invites', { id: i.id }, champs).then(function (r) { if (r && r[0]) { i.statut = r[0].statut; i.envoye_le = r[0].envoye_le; } });
+  })).then(function () { toast(liste.length > 1 ? pluriel(liste.length, 'invitation marquée « Envoyée »', 'invitations marquées « Envoyée »') : '« ' + liste[0].nom + ' » marquée « Envoyée »'); if (S.onglet === 'invites') listeInvites(); }).catch(echec);
+}
+
+/* ---------- Fiche invité ---------- */
+function optionsTables(sel, pourInvite) {
+  return '<option value="">Sans table</option>' + S.tables.map(function (t) {
+    var o = occupation(t), p = o.prevues - (pourInvite && pourInvite.table_id === t.id && compte(pourInvite) ? pers(pourInvite) : 0);
+    return '<option value="' + esc(t.id) + '"' + (sel === t.id ? ' selected' : '') + '>' + esc(nomTable(t)) + ' (' + p + '/' + t.capacite + ')</option>';
+  }).join('');
+}
+function formInvite(id) {
+  var i = id ? S.invites.filter(function (x) { return x.id === id; })[0] : null;
+  var v = i || { nom: '', telephone: '', via_relais: false, groupe: 'autres', adultes: 1, enfants: 0, table_id: '', evenements: S.ev.map(function (e) { return e.id; }), accompagnants: [], regimes: '', notes: '', demo: false, statut: 'a_envoyer' };
+  var lecture = !gestion();
+  var c = '';
+  if (i) c += '<div class="champ"><span class="lib">Lien personnel <span class="aide">(ne change pas si vous modifiez le nom)</span></span><span class="code">' + esc(lienInvite(i)) + '</span>' +
+             '<div class="actions"><button class="btn btn-petit" type="button" id="fi-copier">' + ICO.lien + 'Copier</button>' + (i.statut !== 'annulee' ? '<button class="btn btn-petit" type="button" id="fi-wa">' + ICO.wa + 'WhatsApp</button>' : '') +
+             '<a class="btn btn-petit" href="' + esc(lienInvite(i)) + '&demo=1" target="_blank" rel="noopener">Aperçu (démo)</a></div></div>';
+  c += '<div class="champ"><label for="fi-nom">Nom exact (tel qu\'il apparaîtra sur l\'invitation)</label><input type="text" id="fi-nom" maxlength="120" required value="' + esc(v.nom) + '"></div>';
+  c += '<div class="champ"><label for="fi-tel">Téléphone WhatsApp <span class="aide">(0991234567 devient +243991234567)</span></label><input type="tel" id="fi-tel" value="' + esc(v.telephone || '') + '" placeholder="+243…"></div>';
+  c += '<label class="case"><input type="checkbox" id="fi-relais"' + (v.via_relais ? ' checked' : '') + '>Passe par le numéro relais (pas de téléphone personnel)</label>';
+  c += '<div class="deux"><div class="champ"><label for="fi-ad">Adultes</label><input type="number" id="fi-ad" min="0" max="30" value="' + v.adultes + '"></div><div class="champ"><label for="fi-enf">Enfants</label><input type="number" id="fi-enf" min="0" max="30" value="' + v.enfants + '"></div></div>';
+  c += '<div class="deux"><div class="champ"><label for="fi-groupe">Groupe</label><select id="fi-groupe">' + Object.keys(GROUPES).map(function (g) { return '<option value="' + g + '"' + (v.groupe === g ? ' selected' : '') + '>' + esc(nomGroupe(g)) + '</option>'; }).join('') + '</select></div>' +
+       '<div class="champ"><label for="fi-table">Table</label><select id="fi-table">' + optionsTables(v.table_id, i) + '</select></div></div>';
+  c += '<div class="champ"><span class="lib">Invité(e) à</span><div class="cases">' + (S.ev.length ? S.ev.map(function (e) { return '<label class="case"><input type="checkbox" class="fi-ev" value="' + esc(e.id) + '"' + (v.evenements.indexOf(e.id) >= 0 ? ' checked' : '') + '>' + esc(e.titre) + '</label>'; }).join('') : '<span class="aide">Ajoutez d\'abord les événements (onglet Programme).</span>') + '</div></div>';
+  c += '<div class="champ"><label for="fi-acc">Prénoms des personnes prévues <span class="aide">(un par ligne, facultatif — ils préremplissent la réponse)</span></label><textarea id="fi-acc" rows="3">' + esc((v.accompagnants || []).join('\n')) + '</textarea></div>';
+  c += '<div class="champ"><label for="fi-reg">Régime / allergies connus</label><input type="text" id="fi-reg" maxlength="300" value="' + esc(v.regimes || '') + '"></div>';
+  c += '<div class="champ"><label for="fi-notes">Notes internes <span class="aide">(jamais visibles par l\'invité)</span></label><input type="text" id="fi-notes" maxlength="500" value="' + esc(v.notes || '') + '"></div>';
+  c += '<label class="case"><input type="checkbox" id="fi-demo"' + (v.demo ? ' checked' : '') + '>Invitation de démonstration (filigrane, rien n\'est enregistré, exclue des statistiques)</label>';
+  if (i) {
+    var reps = S.ev.map(function (e) { var r = S.rep[i.id] && S.rep[i.id][e.id]; return r ? '<li><b>' + esc(e.titre) + '</b> : ' + (r.present ? 'présent · ' + r.nb_personnes + (r.prenoms.length ? ' (' + esc(r.prenoms.join(', ')) + ')' : '') : 'absent') + (r.message ? '<br><i>« ' + esc(r.message) + ' »</i>' : '') + '<br><span class="aide">' + esc(fmtDH(r.recu_le)) + '</span></li>' : ''; }).join('');
+    var r0 = S.ev.map(function (e) { return S.rep[i.id] && S.rep[i.id][e.id]; }).filter(Boolean)[0];
+    c += '<div class="champ"><span class="lib">Réponse actuelle</span>' + (reps ? '<ul style="margin:0;padding-left:1.1rem;display:grid;gap:.4rem">' + reps + '</ul>' + (r0 && (r0.regimes || r0.transport || r0.logement) ? '<p class="aide">' + [r0.regimes && 'Régime : ' + esc(r0.regimes), r0.transport && 'Besoin de transport', r0.logement && 'Besoin d\'hébergement'].filter(Boolean).join(' · ') + '</p>' : '') : '<span class="aide">Pas encore de réponse.</span>') + '</div>';
+    c += '<p class="aide">Statut : <b>' + esc(STATUTS[i.statut]) + '</b>' + (i.envoye_le ? ' · envoyée le ' + esc(fmtDH(i.envoye_le)) : '') + '</p>';
+  }
+  c += '<div class="message erreur" id="fi-err" hidden></div><div class="message attention" id="fi-att" hidden></div>';
+  var pied = '';
+  if (i && gestion()) pied += (i.statut === 'annulee' ? '<button class="btn" type="button" id="fi-retablir">Rétablir</button>' : '<button class="btn btn-danger" type="button" id="fi-annuler">Annuler l\'invitation</button>');
+  if (i && admin()) pied += '<button class="btn btn-danger" type="button" id="fi-suppr">Supprimer</button>';
+  if (!lecture) pied += '<button class="btn btn-plein" type="button" id="fi-ok">' + (i ? 'Enregistrer' : 'Ajouter l\'invité') + '</button>';
+  var f = ouvrir(i ? i.nom : 'Nouvel invité', c, pied);
+  if (lecture) $$('input,select,textarea', f).forEach(function (x) { x.disabled = true; });
+  var b;
+  if ((b = $('#fi-copier', f))) b.addEventListener('click', function () { copier(lienInvite(i)); });
+  if ((b = $('#fi-wa', f))) b.addEventListener('click', function () { envoyerWa(i); });
+  if ((b = $('#fi-annuler', f))) b.addEventListener('click', function () { annulerInvite(i); });
+  if ((b = $('#fi-retablir', f))) b.addEventListener('click', function () { changerStatut(i, 'a_envoyer', 'rétablie'); });
+  if ((b = $('#fi-suppr', f))) b.addEventListener('click', function () { supprimerInvite(i); });
+  if ((b = $('#fi-ok', f))) b.addEventListener('click', function () { enregistrerInvite(i, b); });
+  setTimeout(function () { var n = $('#fi-nom', f); if (n && !i) n.focus(); }, 50);
+}
+function enregistrerInvite(i, bouton) {
+  var f = $('#fenetre-contenu'), err = $('#fi-err', f), att = $('#fi-att', f);
+  err.hidden = true;
+  var p = {
+    nom: $('#fi-nom', f).value.replace(/\s+/g, ' ').trim(), telephone: normTel($('#fi-tel', f).value), via_relais: $('#fi-relais', f).checked,
+    adultes: parseInt($('#fi-ad', f).value, 10) || 0, enfants: parseInt($('#fi-enf', f).value, 10) || 0, groupe: $('#fi-groupe', f).value,
+    table_id: $('#fi-table', f).value, evenements: $$('.fi-ev:checked', f).map(function (x) { return x.value; }),
+    accompagnants: $('#fi-acc', f).value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean),
+    regimes: $('#fi-reg', f).value, notes: $('#fi-notes', f).value, demo: $('#fi-demo', f).checked
+  };
+  var pb = [];
+  if (!p.nom) pb.push('Le nom est obligatoire.');
+  if (p.telephone && !telValide(p.telephone)) pb.push('Le téléphone « ' + $('#fi-tel', f).value + ' » n\'est pas valide (format attendu : +243 suivi de 9 chiffres).');
+  if (p.adultes + p.enfants < 1) pb.push('Il faut au moins une personne.');
+  var doublon = S.invites.filter(function (x) { return x.statut !== 'annulee' && (!i || x.id !== i.id) && norm(x.nom) === norm(p.nom); })[0];
+  if (doublon) pb.push('« ' + doublon.nom + ' » existe déjà (même nom). Précisez le nom, par exemple avec la famille entre parenthèses.');
+  if (p.accompagnants.length > p.adultes + p.enfants) pb.push(p.accompagnants.length + ' prénoms pour ' + (p.adultes + p.enfants) + ' personne(s) : retirez-en ou augmentez le nombre.');
+  if (pb.length) { err.innerHTML = pb.map(esc).join('<br>'); err.hidden = false; return; }
+  if (i) p.id = i.id; else p.mariage_id = S.m.id;
+
+  // Avertissements à confirmer explicitement
+  var avert = [];
+  if (p.table_id) {
+    var t = tableDe(p.table_id), o = occupation(t), deja = i && i.table_id === t.id && compte(i) ? pers(i) : 0, total = o.prevues - deja + p.adultes + p.enfants;
+    if (total > t.capacite) avert.push(nomTable(t) + ' aura <b>' + total + ' personnes pour ' + t.capacite + ' places</b>.');
+  }
+  if (i && i.nom !== p.nom) avert.push('Le nom change : « ' + esc(i.nom) + ' » → « ' + esc(p.nom) + ' ». Le lien déjà envoyé reste valable et affichera le nouveau nom.');
+  if (i && i.table_id !== (p.table_id || null)) { var a = tableDe(i.table_id), n = tableDe(p.table_id); avert.push('Changement de table : ' + esc(a ? nomTable(a) : 'sans table') + ' → ' + esc(n ? nomTable(n) : 'sans table') + '.'); }
+  var reps = i ? Object.keys(S.rep[i.id] || {}).map(function (k) { return S.rep[i.id][k]; }) : [];
+  if (i && reps.some(function (r) { return r.nb_personnes > p.adultes + p.enfants; })) avert.push('Une réponse déjà reçue compte plus de personnes que le nouveau total : vérifiez avec l\'invité.');
+  if (!p.evenements.length && S.ev.length) avert.push('Aucun événement coché : l\'invitation n\'affichera pas de programme.');
+  (avert.length ? confirmer('À vérifier avant d\'enregistrer', '<ul style="padding-left:1.1rem;margin:0;display:grid;gap:.4rem"><li>' + avert.join('</li><li>') + '</li></ul>', 'Enregistrer quand même') : Promise.resolve(true)).then(function (ok) {
+    if (!ok) return;
+    bouton.disabled = true;
+    rpc('enregistrer_invite', { p: p }).then(function (r) {
+      toast(i ? '« ' + r.nom + ' » enregistré' : '« ' + r.nom + ' » ajouté · lien ?i=' + r.code); fermer(); return recharger();
+    }).catch(function (e) { bouton.disabled = false; err.textContent = messageErreur(e); err.hidden = false; });
+  });
+}
+function changerStatut(i, statut, mot) {
+  return modifier('invites', { id: i.id }, { statut: statut }).then(function (r) {
+    if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.');
+    toast('« ' + i.nom + ' » ' + mot); fermer(); return recharger();
+  }).catch(echec);
+}
+function annulerInvite(i) {
+  confirmer('Annuler l\'invitation ?', '<p>« <b>' + esc(i.nom) + '</b> » : le lien <span class="code">?i=' + esc(i.code) + '</span> affichera « Invitation annulée » et sa place (' + pluriel(pers(i), 'personne', 'personnes') + ') sera libérée à sa table.</p><p class="aide">La fiche et ses réponses sont conservées ; vous pourrez la rétablir.</p>', 'Annuler l\'invitation', true)
+    .then(function (ok) { if (ok) changerStatut(i, 'annulee', 'annulée'); });
+}
+function supprimerInvite(i) {
+  var nbRep = Object.keys(S.rep[i.id] || {}).length;
+  confirmer('Supprimer définitivement ?', '<p>Seront supprimés :</p><ul style="padding-left:1.1rem"><li>la fiche « <b>' + esc(i.nom) + '</b> » (' + pluriel(pers(i), 'personne', 'personnes') + (i.telephone ? ', ' + esc(i.telephone) : '') + ')</li>' +
+    '<li>son lien <span class="code">?i=' + esc(i.code) + '</span>, qui affichera « Lien non reconnu »</li><li>' + (nbRep ? 'ses réponses (' + pluriel(nbRep, 'événement répondu', 'événements répondus') + ') et tout leur historique' : 'aucune réponse (il n\'a pas encore répondu)') + '</li>' +
+    ((i.accompagnants || []).length ? '<li>ses accompagnants : ' + esc(i.accompagnants.join(', ')) + '</li>' : '') + '</ul><p class="aide">Cette action est irréversible. Pour garder l\'historique, préférez « Annuler l\'invitation ».</p>', 'Supprimer définitivement', true)
+    .then(function (ok) {
+      if (!ok) return;
+      supprimer('invites', { id: i.id }).then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast('« ' + i.nom + ' » supprimé'); fermer(); return recharger(); }).catch(echec);
+    });
+}
+
+/* ---------- Import en masse ---------- */
+function formImport() {
+  var c = '<p class="aide" style="margin-top:0">Une ligne par invitation : <b>Nom ; numéro</b>, et si besoin <b>; adultes ; enfants</b>. Exemple :</p>' +
+          '<span class="code">Couple Mukendi ; 0991234567 ; 2<br>Maman Thérèse ; ; 1<br>Famille Kasongo ; +243 81 234 5678 ; 2 ; 3</span>' +
+          '<div class="champ"><label for="im-texte">Liste</label><textarea id="im-texte" rows="8" placeholder="Nom ; numéro"></textarea></div>' +
+          '<div class="deux"><div class="champ"><label for="im-groupe">Groupe</label><select id="im-groupe">' + Object.keys(GROUPES).map(function (g) { return '<option value="' + g + '"' + (g === 'autres' ? ' selected' : '') + '>' + esc(nomGroupe(g)) + '</option>'; }).join('') + '</select></div>' +
+          '<div class="champ"><label for="im-table">Table</label><select id="im-table">' + optionsTables('') + '</select></div></div>' +
+          '<div class="champ"><span class="lib">Invités à</span><div class="cases">' + S.ev.map(function (e) { return '<label class="case"><input type="checkbox" class="im-ev" value="' + esc(e.id) + '" checked>' + esc(e.titre) + '</label>'; }).join('') + '</div></div>' +
+          '<label class="case"><input type="checkbox" id="im-relais">Sans numéro → passer par le relais</label>' +
+          '<div id="im-apercu"></div>';
+  var f = ouvrir('Importer une liste', c, '<button class="btn" type="button" id="im-analyser">Vérifier la liste</button><button class="btn btn-plein" type="button" id="im-ok" disabled>Importer</button>');
+  var lignes = [];
+  function analyser() {
+    var existants = {}; S.invites.forEach(function (i) { if (i.statut !== 'annulee') existants[norm(i.nom)] = i.nom; });
+    var vus = {};
+    lignes = $('#im-texte', f).value.split('\n').map(function (brut, k) {
+      if (!brut.trim()) return null;
+      var p = brut.split(/[;\t]/).map(function (x) { return x.trim(); });
+      var l = { n: k + 1, nom: (p[0] || '').replace(/\s+/g, ' '), telBrut: p[1] || '', telephone: normTel(p[1]), adultes: p[2] ? parseInt(p[2], 10) : 1, enfants: p[3] ? parseInt(p[3], 10) : 0, pb: '' };
+      var cle = norm(l.nom);
+      if (!l.nom) l.pb = 'Nom vide';
+      else if (existants[cle]) l.pb = 'Doublon : « ' + existants[cle] + ' » existe déjà';
+      else if (vus[cle]) l.pb = 'Doublon dans la liste (ligne ' + vus[cle] + ')';
+      else if (l.telephone && !telValide(l.telephone)) l.pb = 'Téléphone invalide';
+      else if (isNaN(l.adultes) || isNaN(l.enfants) || l.adultes < 0 || l.enfants < 0 || l.adultes + l.enfants < 1 || l.adultes + l.enfants > 30) l.pb = 'Nombre de personnes invalide';
+      if (cle && !vus[cle]) vus[cle] = l.n;
+      return l;
+    }).filter(Boolean);
+    var bons = lignes.filter(function (l) { return !l.pb; });
+    var t = tableDe($('#im-table', f).value), msg = '';
+    if (t) { var o = occupation(t), tot = o.prevues + bons.reduce(function (s, l) { return s + l.adultes + l.enfants; }, 0); if (tot > t.capacite) msg = '<div class="message attention">' + esc(nomTable(t)) + ' aurait ' + tot + ' personnes pour ' + t.capacite + ' places.</div>'; }
+    $('#im-apercu', f).innerHTML = '<div class="defile" style="margin-top:.8rem"><table class="donnees apercu-import"><thead><tr><th>#</th><th>Nom</th><th>Téléphone</th><th class="n">Pers.</th><th>Contrôle</th></tr></thead><tbody>' +
+      lignes.map(function (l) { return '<tr><td>' + l.n + '</td><td>' + esc(l.nom) + '</td><td>' + esc(l.telephone || (l.telBrut ? l.telBrut : '—')) + '</td><td class="n">' + (l.adultes + l.enfants || '?') + '</td><td class="' + (l.pb ? 'err' : 'ok') + '">' + esc(l.pb || 'OK') + '</td></tr>'; }).join('') +
+      '</tbody></table></div><div class="message ' + (bons.length === lignes.length ? 'ok' : 'attention') + '">' + pluriel(bons.length, 'ligne prête', 'lignes prêtes') + (lignes.length - bons.length ? ' · ' + pluriel(lignes.length - bons.length, 'ligne écartée', 'lignes écartées') + ' (non importées)' : '') + '</div>' + msg;
+    $('#im-ok', f).disabled = !bons.length; $('#im-ok', f).textContent = 'Importer ' + pluriel(bons.length, 'invité', 'invités');
+  }
+  $('#im-analyser', f).addEventListener('click', analyser);
+  $('#im-texte', f).addEventListener('input', function () { $('#im-ok', f).disabled = true; });
+  $('#im-ok', f).addEventListener('click', function () {
+    var b = this, bons = lignes.filter(function (l) { return !l.pb; }), relais = $('#im-relais', f).checked;
+    b.disabled = true;
+    rpc('importer_invites', { p_mariage: S.m.id, p_evenements: $$('.im-ev:checked', f).map(function (x) { return x.value; }),
+      p_lignes: bons.map(function (l) { return { nom: l.nom, telephone: l.telephone, adultes: l.adultes, enfants: l.enfants, groupe: $('#im-groupe', f).value, table_id: $('#im-table', f).value, via_relais: relais && !l.telephone }; }) })
+      .then(function (r) { toast(pluriel(r.ajoutes, 'invité importé', 'invités importés')); fermer(); return recharger(); })
+      .catch(function (e) { b.disabled = false; $('#im-apercu', f).insertAdjacentHTML('beforeend', '<div class="message erreur">' + esc(messageErreur(e)) + '</div>'); });
+  });
+}
+
+/* ---------- 4.3 Plan de salle ---------- */
+function vueSalle() {
+  var tot = S.tables.reduce(function (s, t) { return s + t.capacite; }, 0), occ = 0, dep = 0, pleines = 0;
+  S.tables.forEach(function (t) { var o = occupation(t); occ += o.prevues; if (o.depasse) dep++; else if (o.prevues === t.capacite) pleines++; });
+  var sans = S.invites.filter(function (i) { return !i.table_id && compte(i); });
+  var h = '<div class="entete-section"><h1>Plan de salle</h1>' + (gestion() ? '<div class="actions"><button class="btn btn-petit btn-plein" id="ajout-tables" type="button">' + ICO.plus + 'Tables</button></div>' : '') + '</div>';
+  h += '<p class="compte">' + pluriel(S.tables.length, 'table', 'tables') + ' · ' + occ + ' / ' + tot + ' places occupées · ' + pluriel(pleines, 'table pleine', 'tables pleines') + (dep ? ' · <b style="color:var(--rouge)">' + pluriel(dep, 'dépassement', 'dépassements') + '</b>' : '') +
+       '. Touchez un invité puis « Placer ici » sur une table (ou glissez-le sur ordinateur). Les invitations annulées ne comptent pas.</p>';
+  h += '<div class="bandeau-placement" id="bandeau-placement" hidden><span id="placement-texte"></span><button type="button" id="placement-annuler">Annuler</button></div>';
+  h += '<div class="salle" id="salle">' + S.tables.map(carteTable).join('') + '</div>';
+  if (!S.tables.length) h += '<div class="carte">Aucune table. ' + (gestion() ? 'Ajoutez-en avec le bouton « Tables ».' : '') + '</div>';
+  h += '<div class="carte zone-sans-table table-carte" data-table=""><div class="tete"><div class="info"><b>Sans table</b><small>' + pluriel(sans.length, 'invitation', 'invitations') + ' · ' + pluriel(sans.reduce(function (s, i) { return s + pers(i); }, 0), 'personne', 'personnes') + '</small></div><button class="btn btn-petit placer" type="button" data-placer="">Retirer de sa table</button></div>' +
+       '<div class="jetons">' + sans.map(jetonInvite).join('') + '</div></div>';
+  $('#vue').innerHTML = h;
+  brancherSalle();
+  var a = $('#ajout-tables'); if (a) a.addEventListener('click', formTables);
+}
+function carteTable(t) {
+  var o = occupation(t), pct = Math.min(1, o.prevues / t.capacite), C = 2 * Math.PI * 26;
+  var cls = o.depasse ? ' depasse' : o.prevues === t.capacite ? ' plein' : '';
+  var couleur = o.depasse ? 'var(--rouge)' : o.prevues === t.capacite ? 'var(--ok)' : 'var(--or)';
+  var annules = S.invites.filter(function (i) { return i.table_id === t.id && !compte(i); });
+  var relais = o.invites.filter(function (i) { return (i.via_relais || !i.telephone) && !i.demo; });
+  return '<div class="table-carte' + cls + '" data-table="' + esc(t.id) + '">' +
+    '<div class="tete"><div class="rond"><svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="26" fill="none" stroke="var(--ligne)" stroke-width="3"/><circle cx="28" cy="28" r="26" fill="none" stroke="' + couleur + '" stroke-width="3" stroke-dasharray="' + (C * pct).toFixed(1) + ' ' + C.toFixed(1) + '" stroke-linecap="round"/></svg>' + esc(t.nom.length > 4 ? t.nom.slice(0, 3) + '…' : t.nom) + '</div>' +
+    '<div class="info"><b>' + esc(nomTable(t)) + '</b><small>' + o.prevues + ' / ' + t.capacite + ' places' + (o.depasse ? ' — dépassement !' : o.prevues === t.capacite ? ' — pleine' : ' — ' + (t.capacite - o.prevues) + ' libre(s)') + (soiree() ? ' · ' + o.confirmees + ' confirmé(s)' : '') + '</small></div>' +
+    (gestion() ? '<button class="btn btn-petit" type="button" data-edit-table="' + esc(t.id) + '" aria-label="Modifier ' + esc(nomTable(t)) + '">✎</button>' : '') + '</div>' +
+    '<div class="jetons">' + o.invites.map(jetonInvite).join('') + annules.map(function (i) { return '<span class="jeton annule" title="Annulée">' + esc(i.nom) + '</span>'; }).join('') + (o.invites.length ? '' : '<small class="aide">Table vide</small>') + '</div>' +
+    '<div class="actions"><button class="btn btn-petit placer" type="button" data-placer="' + esc(t.id) + '">Placer ici</button>' +
+    (relais.length && gestion() ? '<button class="btn btn-petit" type="button" data-relais-table="' + esc(t.id) + '">' + ICO.wa + 'Envoyer au relais (' + relais.length + ')</button>' : '') + '</div></div>';
+}
+function jetonInvite(i) { return '<span class="jeton' + (S.choisi === i.id ? ' choisi' : '') + '" draggable="' + gestion() + '" data-jeton="' + esc(i.id) + '" role="button" tabindex="0">' + esc(i.nom) + ' <small>' + pers(i) + '</small></span>'; }
+function brancherSalle() {
+  var salle = $('#vue');
+  function majPlacement() {
+    salle.classList.toggle('mode-placement', !!S.choisi);
+    var b = $('#bandeau-placement'), i = S.choisi && S.invites.filter(function (x) { return x.id === S.choisi; })[0];
+    b.hidden = !i; if (i) $('#placement-texte').textContent = 'Placer « ' + i.nom + ' » (' + pluriel(pers(i), 'personne', 'personnes') + ')';
+    $$('.jeton', salle).forEach(function (j) { j.classList.toggle('choisi', j.getAttribute('data-jeton') === S.choisi); });
+  }
+  if (gestion()) {
+    $$('[data-jeton]', salle).forEach(function (j) {
+      var choisir = function () { S.choisi = S.choisi === j.getAttribute('data-jeton') ? null : j.getAttribute('data-jeton'); majPlacement(); };
+      j.addEventListener('click', choisir);
+      j.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choisir(); } });
+      j.addEventListener('dragstart', function (e) { e.dataTransfer.setData('text/plain', j.getAttribute('data-jeton')); });
+    });
+    $$('[data-table]', salle).forEach(function (c) {
+      c.addEventListener('dragover', function (e) { e.preventDefault(); c.classList.add('cible'); });
+      c.addEventListener('dragleave', function () { c.classList.remove('cible'); });
+      c.addEventListener('drop', function (e) { e.preventDefault(); c.classList.remove('cible'); deplacer(e.dataTransfer.getData('text/plain'), c.getAttribute('data-table') || null); });
+    });
+    $$('[data-placer]', salle).forEach(function (b) { b.addEventListener('click', function () { if (S.choisi) deplacer(S.choisi, b.getAttribute('data-placer') || null); }); });
+    $$('[data-edit-table]', salle).forEach(function (b) { b.addEventListener('click', function () { formTable(tableDe(b.getAttribute('data-edit-table'))); }); });
+    $$('[data-relais-table]', salle).forEach(function (b) { b.addEventListener('click', function () { envoyerRelaisTable(tableDe(b.getAttribute('data-relais-table'))); }); });
+    $('#placement-annuler').addEventListener('click', function () { S.choisi = null; majPlacement(); });
+  }
+  majPlacement();
+}
+// Déplacement : toujours annoncé, confirmé si la table déborde, annulable.
+function deplacer(inviteId, tableId) {
+  var i = S.invites.filter(function (x) { return x.id === inviteId; })[0]; if (!i) return;
+  if ((i.table_id || null) === (tableId || null)) { S.choisi = null; return vueSalle(); }
+  var avant = tableDe(i.table_id), apres = tableDe(tableId);
+  var txt = '« ' + i.nom + ' » : ' + (avant ? nomTable(avant) : 'sans table') + ' → ' + (apres ? nomTable(apres) : 'sans table');
+  var verif = Promise.resolve(true);
+  if (apres) { var o = occupation(apres), tot = o.prevues + (compte(i) ? pers(i) : 0); if (tot > apres.capacite) verif = confirmer('Table complète', '<p>' + esc(nomTable(apres)) + ' aura <b>' + tot + ' personnes pour ' + apres.capacite + ' places</b> si vous y placez « ' + esc(i.nom) + ' » (' + pluriel(pers(i), 'personne', 'personnes') + ').</p>', 'Placer quand même', true); }
+  verif.then(function (ok) {
+    if (!ok) return;
+    var ancien = i.table_id || null;
+    i.table_id = tableId || null; S.choisi = null; vueSalle();
+    modifier('invites', { id: i.id }, { table_id: tableId || null }).then(function (r) {
+      if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.');
+      toast(txt, { annuler: function () { modifier('invites', { id: i.id }, { table_id: ancien }).then(function () { i.table_id = ancien; toast('Déplacement annulé'); vueSalle(); }).catch(echec); } });
+    }).catch(function (e) { i.table_id = ancien; vueSalle(); echec(e); });
+  });
+}
+function envoyerRelaisTable(t) {
+  if (!S.m.whatsapp_relais) { toast('Aucun numéro relais enregistré (onglet Réglages).', { erreur: true }); return; }
+  var l = occupation(t).invites.filter(function (i) { return (i.via_relais || !i.telephone) && !i.demo; });
+  var txt = 'Bonjour, voici les invitations au mariage de ' + S.m.marie_1 + ' & ' + S.m.marie_2 + ' pour ' + nomTable(t) + ', à transmettre s\'il vous plaît :\n\n' +
+            l.map(function (i) { return '• ' + i.nom + ' (' + pluriel(pers(i), 'personne', 'personnes') + ') :\n' + lienInvite(i); }).join('\n\n');
+  window.open(lienWa(S.m.whatsapp_relais, txt), '_blank', 'noopener');
+  marquerEnvoyees(l);
+}
+function formTables() {
+  var nums = S.tables.map(function (t) { return parseInt(t.nom, 10); }).filter(function (n) { return !isNaN(n); }), suivant = nums.length ? Math.max.apply(null, nums) + 1 : 1;
+  var f = ouvrir('Ajouter des tables', '<div class="trois"><div class="champ"><label for="tb-n">Nombre</label><input type="number" id="tb-n" min="1" max="60" value="' + (S.tables.length ? 1 : 10) + '"></div>' +
+    '<div class="champ"><label for="tb-cap">Places par table</label><select id="tb-cap">' + [6, 8, 10, 12].map(function (c) { return '<option' + (c === 10 ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div>' +
+    '<div class="champ"><label for="tb-debut">Numéro de départ</label><input type="number" id="tb-debut" min="1" value="' + suivant + '"></div></div>' +
+    '<div class="champ"><label for="tb-nom">Ou un nom unique <span class="aide">(ex. « Table d\'honneur » — remplace la numérotation)</span></label><input type="text" id="tb-nom" maxlength="40"></div><div id="tb-apercu" class="message info"></div>',
+    '<button class="btn btn-plein" type="button" id="tb-ok">Ajouter</button>');
+  function noms() {
+    var nom = $('#tb-nom', f).value.trim(); if (nom) return [nom];
+    var n = Math.min(60, parseInt($('#tb-n', f).value, 10) || 0), d = parseInt($('#tb-debut', f).value, 10) || 1, l = [];
+    for (var k = 0; k < n; k++) l.push(String(d + k)); return l;
+  }
+  function ap() { var l = noms(), ex = S.tables.map(function (t) { return t.nom.toLowerCase(); }), conflits = l.filter(function (x) { return ex.indexOf(x.toLowerCase()) >= 0; });
+    $('#tb-apercu', f).className = 'message ' + (conflits.length ? 'erreur' : 'info');
+    $('#tb-apercu', f).textContent = conflits.length ? 'Ces tables existent déjà : ' + conflits.join(', ') : 'Seront créées : ' + l.map(function (x) { return /^\d+$/.test(x) ? 'Table ' + x : x; }).join(', ') + ' (' + $('#tb-cap', f).value + ' places chacune).';
+    $('#tb-ok', f).disabled = !l.length || conflits.length > 0; }
+  $$('input,select', f).forEach(function (x) { x.addEventListener('input', ap); }); ap();
+  $('#tb-ok', f).addEventListener('click', function () {
+    var cap = parseInt($('#tb-cap', f).value, 10), base = S.tables.length;
+    this.disabled = true;
+    inserer('tables_salle', noms().map(function (n, k) { return { mariage_id: S.m.id, nom: n, capacite: cap, ordre: base + k }; }))
+      .then(function (r) { toast(pluriel(r.length, 'table ajoutée', 'tables ajoutées')); fermer(); return recharger(); }).catch(echec);
+  });
+}
+function formTable(t) {
+  var o = occupation(t);
+  var f = ouvrir(nomTable(t), '<div class="deux"><div class="champ"><label for="t-nom">Nom</label><input type="text" id="t-nom" maxlength="40" value="' + esc(t.nom) + '"></div>' +
+    '<div class="champ"><label for="t-cap">Places</label><input type="number" id="t-cap" min="2" max="20" value="' + t.capacite + '"></div></div><p class="aide">' + o.prevues + ' personne(s) placée(s) actuellement.</p><div class="message erreur" id="t-err" hidden></div>',
+    (admin() ? '<button class="btn btn-danger" type="button" id="t-suppr">Supprimer la table</button>' : '') + '<button class="btn btn-plein" type="button" id="t-ok">Enregistrer</button>');
+  $('#t-ok', f).addEventListener('click', function () {
+    var nom = $('#t-nom', f).value.trim(), cap = parseInt($('#t-cap', f).value, 10);
+    if (!nom || !(cap >= 2 && cap <= 20)) { $('#t-err', f).textContent = 'Nom obligatoire, places entre 2 et 20.'; $('#t-err', f).hidden = false; return; }
+    var go = cap < o.prevues ? confirmer('Capacité insuffisante', '<p>' + o.prevues + ' personnes sont déjà placées pour ' + cap + ' places : la table sera signalée en dépassement.</p>', 'Enregistrer quand même') : Promise.resolve(true);
+    go.then(function (ok) { if (ok) modifier('tables_salle', { id: t.id }, { nom: nom, capacite: cap }).then(function () { toast(nomTable({ nom: nom }) + ' enregistrée'); fermer(); return recharger(); }).catch(function (e) { $('#t-err', f).textContent = /23505/.test(e.code) ? 'Une table porte déjà ce nom.' : messageErreur(e); $('#t-err', f).hidden = false; }); });
+  });
+  var s = $('#t-suppr', f);
+  if (s) s.addEventListener('click', function () {
+    var tous = S.invites.filter(function (i) { return i.table_id === t.id; });
+    confirmer('Supprimer ' + nomTable(t) + ' ?', '<p>La table « ' + esc(t.nom) + ' » sera supprimée.</p>' + (tous.length ? '<p>Ses ' + pluriel(tous.length, 'invitation passera', 'invitations passeront') + ' « Sans table » : ' + tous.map(function (i) { return esc(i.nom); }).join(', ') + '.</p>' : '<p>Elle est vide.</p>') + '<p class="aide">Aucun invité ni aucune réponse ne sera supprimé.</p>', 'Supprimer la table', true)
+      .then(function (ok) { if (ok) supprimer('tables_salle', { id: t.id }).then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast(nomTable(t) + ' supprimée'); fermer(); return recharger(); }).catch(echec); });
+  });
+}
+
+/* ---------- 4.4 Programme ---------- */
+function vueProgramme() {
+  var h = '<div class="entete-section"><h1>Programme</h1>' + (gestion() ? '<button class="btn btn-petit btn-plein" id="ajout-ev" type="button">' + ICO.plus + 'Événement</button>' : '') + '</div>';
+  h += '<ul class="liste">' + S.ev.map(function (e) {
+    var n = S.invites.filter(function (i) { return reel(i) && i.evenements.indexOf(e.id) >= 0; });
+    return '<li class="invite"><div class="ligne1"><button class="nom" type="button" data-ev="' + esc(e.id) + '">' + esc(e.titre) + '</button><span class="badge b-envoyee">' + esc(TYPES[e.type]) + '</span></div>' +
+      '<div class="meta"><span>' + esc(fmtDH(e.debut)) + '</span><span>' + esc(e.lieu || 'Lieu à définir') + '</span>' + (e.tenue ? '<span>Tenue : ' + esc(e.tenue) + '</span>' : '') + '<span>' + pluriel(n.length, 'invitation', 'invitations') + '</span></div>' +
+      (S.m.evenement_actif === e.id ? '<div><span class="badge b-confirmee">Événement actif pour le scan</span></div>' : '') + '</li>';
+  }).join('') + '</ul>';
+  if (!S.ev.length) h += '<div class="carte">Aucun événement. ' + (gestion() ? 'Ajoutez la cérémonie civile, religieuse et la soirée.' : '') + '</div>';
+  if (admin() && S.ev.length) h += '<div class="carte"><h3>Événement actif pour le scan (jour J)</h3><div class="champ"><select id="ev-actif"><option value="">Aucun</option>' + S.ev.map(function (e) { return '<option value="' + esc(e.id) + '"' + (S.m.evenement_actif === e.id ? ' selected' : '') + '>' + esc(e.titre) + '</option>'; }).join('') + '</select></div><p class="aide">Les hôtes enregistreront les entrées pour cet événement (étape E).</p></div>';
+  $('#vue').innerHTML = h;
+  $$('[data-ev]').forEach(function (b) { b.addEventListener('click', function () { formEvenement(evDe(b.getAttribute('data-ev'))); }); });
+  var a = $('#ajout-ev'); if (a) a.addEventListener('click', function () { formEvenement(null); });
+  var act = $('#ev-actif'); if (act) act.addEventListener('change', function () { modifier('mariages', { id: S.m.id }, { evenement_actif: act.value || null }).then(function () { toast('Événement actif enregistré'); return recharger(); }).catch(echec); });
+}
+function formEvenement(e) {
+  var v = e || { type: S.ev.some(function (x) { return x.type === 'civil'; }) ? (S.ev.some(function (x) { return x.type === 'religieux'; }) ? 'soiree' : 'religieux') : 'civil', titre: '', lieu: '', adresse: '', maps_url: '', debut: null, tenue: '', ordre: S.ev.length + 1 };
+  var c = '<div class="deux"><div class="champ"><label for="e-type">Type</label><select id="e-type">' + Object.keys(TYPES).map(function (k) { return '<option value="' + k + '"' + (v.type === k ? ' selected' : '') + '>' + TYPES[k] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="champ"><label for="e-ordre">Ordre</label><input type="number" id="e-ordre" min="0" max="20" value="' + v.ordre + '"></div></div>' +
+    '<div class="champ"><label for="e-titre">Titre affiché</label><input type="text" id="e-titre" maxlength="80" value="' + esc(v.titre) + '" placeholder="' + esc(TYPES[v.type]) + '"></div>' +
+    '<div class="champ"><label for="e-debut">Date et heure <span class="aide">(heure de Lubumbashi, facultatif)</span></label><input type="datetime-local" id="e-debut" value="' + esc(versChampLocal(v.debut)) + '"></div>' +
+    '<div class="champ"><label for="e-lieu">Lieu</label><input type="text" id="e-lieu" maxlength="120" value="' + esc(v.lieu || '') + '" placeholder="Ex. Maison communale de Kampemba"></div>' +
+    '<div class="champ"><label for="e-adr">Adresse</label><input type="text" id="e-adr" maxlength="200" value="' + esc(v.adresse || '') + '"></div>' +
+    '<div class="champ"><label for="e-maps">Lien Google Maps <span class="aide">(facultatif, sinon recherche par adresse)</span></label><input type="url" id="e-maps" value="' + esc(v.maps_url || '') + '" placeholder="https://maps.app.goo.gl/…"></div>' +
+    '<div class="champ"><label for="e-tenue">Tenue demandée</label><input type="text" id="e-tenue" maxlength="120" value="' + esc(v.tenue || '') + '"></div>';
+  if (!e && S.invites.length) c += '<label class="case"><input type="checkbox" id="e-tous" checked>Inviter tous les invités actuels à cet événement (' + S.invites.filter(compte).length + ')</label>';
+  c += '<div class="message erreur" id="e-err" hidden></div>';
+  var f = ouvrir(e ? e.titre : 'Nouvel événement', c, (e && admin() ? '<button class="btn btn-danger" type="button" id="e-suppr">Supprimer</button>' : '') + (gestion() ? '<button class="btn btn-plein" type="button" id="e-ok">Enregistrer</button>' : ''));
+  if (!gestion()) $$('input,select', f).forEach(function (x) { x.disabled = true; });
+  $('#e-type', f).addEventListener('change', function () { $('#e-titre', f).placeholder = TYPES[this.value]; });
+  var ok = $('#e-ok', f);
+  if (ok) ok.addEventListener('click', function () {
+    var maps = $('#e-maps', f).value.trim();
+    if (maps && !/^https:\/\//.test(maps)) { $('#e-err', f).textContent = 'Le lien Maps doit commencer par https://'; $('#e-err', f).hidden = false; return; }
+    var ch = { type: $('#e-type', f).value, titre: $('#e-titre', f).value.trim() || TYPES[$('#e-type', f).value], ordre: parseInt($('#e-ordre', f).value, 10) || 0,
+      debut: depuisChampLocal($('#e-debut', f).value), lieu: $('#e-lieu', f).value.trim() || null, adresse: $('#e-adr', f).value.trim() || null, maps_url: maps || null, tenue: $('#e-tenue', f).value.trim() || null };
+    ok.disabled = true;
+    var tous = $('#e-tous', f) && $('#e-tous', f).checked;
+    (e ? modifier('evenements', { id: e.id }, ch) : inserer('evenements', [Object.assign({ mariage_id: S.m.id }, ch)]).then(function (r) {
+      if (!tous || !r[0]) return r;
+      var nv = r[0].id;
+      return Promise.all(S.invites.filter(compte).map(function (i) { return rpc('enregistrer_invite', { p: { id: i.id, evenements: i.evenements.concat([nv]) } }); })).then(function () { return r; });
+    })).then(function () { toast('« ' + ch.titre + ' » enregistré'); fermer(); return recharger(); }).catch(function (er) { ok.disabled = false; $('#e-err', f).textContent = messageErreur(er); $('#e-err', f).hidden = false; });
+  });
+  var s = $('#e-suppr', f);
+  if (s) s.addEventListener('click', function () {
+    var conv = S.invites.filter(function (i) { return i.evenements.indexOf(e.id) >= 0; }), reps = S.invites.filter(function (i) { return S.rep[i.id] && S.rep[i.id][e.id]; });
+    confirmer('Supprimer « ' + e.titre + ' » ?', '<p>Seront supprimés :</p><ul style="padding-left:1.1rem"><li>l\'événement « ' + esc(e.titre) + ' » du programme de ' + pluriel(conv.length, 'invitation', 'invitations') + '</li><li>' + (reps.length ? 'les réponses de ' + pluriel(reps.length, 'invité', 'invités') + ' à cet événement, avec leur historique' : 'aucune réponse (personne n\'a encore répondu pour cet événement)') + '</li></ul><p class="aide">Les invités eux-mêmes ne sont pas supprimés. Action irréversible.</p>', 'Supprimer l\'événement', true)
+      .then(function (go) { if (go) supprimer('evenements', { id: e.id }).then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast('Événement supprimé'); fermer(); return recharger(); }).catch(echec); });
+  });
+}
+
+/* ---------- 4.5 Réglages ---------- */
+function vueReglages() {
+  var m = S.m, ro = !admin();
+  var h = '<div class="entete-section"><h1>Réglages</h1></div>';
+  h += '<form class="carte" id="form-mariage"><h2>Le mariage</h2>' + (ro ? '<p class="aide">Seul l\'administrateur peut modifier ces informations.</p>' : '') +
+    '<div class="deux"><div class="champ"><label for="r-m1">Marié(e) 1</label><input type="text" id="r-m1" maxlength="60" required value="' + esc(m.marie_1) + '"></div><div class="champ"><label for="r-m2">Marié(e) 2</label><input type="text" id="r-m2" maxlength="60" required value="' + esc(m.marie_2) + '"></div></div>' +
+    '<div class="deux"><div class="champ"><label for="r-date">Date du mariage <span class="aide">(facultatif)</span></label><input type="date" id="r-date" value="' + esc(m.date_mariage || '') + '"></div><div class="champ"><label for="r-ville">Ville</label><input type="text" id="r-ville" maxlength="60" value="' + esc(m.ville || '') + '"></div></div>' +
+    '<div class="champ"><label for="r-limite">Date limite des réponses <span class="aide">(facultatif — au-delà, l\'invité ne peut plus répondre ni modifier)</span></label><input type="datetime-local" id="r-limite" value="' + esc(versChampLocal(m.reponses_jusqu_au)) + '"></div>' +
+    '<div class="deux"><div class="champ"><label for="r-wa">WhatsApp de l\'organisateur <span class="aide">(bouton « Contacter » de l\'invitation, public)</span></label><input type="tel" id="r-wa" value="' + esc(m.whatsapp_organisateur || '') + '" placeholder="+243…"></div>' +
+    '<div class="champ"><label for="r-relais">Numéro relais <span class="aide">(reçoit les invitations des invités sans téléphone)</span></label><input type="tel" id="r-relais" value="' + esc(m.whatsapp_relais || '') + '" placeholder="+243…"></div></div>' +
+    '<div class="deux"><div class="champ"><label for="r-langue">Langue des invitations</label><select id="r-langue"><option value="fr">Français</option><option value="ln"' + (m.langue === 'ln' ? ' selected' : '') + '>Lingala (traduction à compléter)</option><option value="sw"' + (m.langue === 'sw' ? ' selected' : '') + '>Swahili (traduction à compléter)</option></select></div>' +
+    '<div class="champ"><label for="r-conserv">Conservation des données (jours après le mariage)</label><input type="number" id="r-conserv" min="1" max="3650" value="' + m.conservation_jours + '"></div></div>' +
+    '<div class="message erreur" id="r-err" hidden></div>' + (ro ? '' : '<button class="btn btn-plein" style="margin-top:1rem" type="submit">Enregistrer</button>') + '</form>';
+  if (admin()) h += '<div class="carte"><h2>Équipe</h2><p class="aide">Organisateur : invités, tables et exports. Hôte d\'accueil : scan et recherche le jour J, sans voir les téléphones. La personne doit d\'abord ouvrir cette page et se connecter une fois avec son adresse.</p><div id="membres">Chargement…</div>' +
+    '<form id="form-membre" class="trois"><div class="champ"><label for="mb-email">E-mail</label><input type="email" id="mb-email" required></div><div class="champ"><label for="mb-role">Rôle</label><select id="mb-role"><option value="organisateur">Organisateur</option><option value="hote">Hôte d\'accueil</option><option value="admin">Administrateur</option></select></div><div class="champ"><label for="mb-nom">Prénom</label><input type="text" id="mb-nom" maxlength="40"></div></form>' +
+    '<button class="btn btn-plein" style="margin-top:.8rem" type="submit" form="form-membre">Ajouter à l\'équipe</button><div class="message erreur" id="mb-err" hidden></div></div>';
+  if (gestion()) h += '<div class="carte"><h2>Exports et sauvegarde</h2><div class="actions"><button class="btn" type="button" id="exp-json">Sauvegarde complète (JSON)</button><button class="btn" type="button" id="exp-csv">Liste des invités (CSV)</button></div><p class="aide">Ces fichiers contiennent les numéros de téléphone : ne les partagez pas. Les listes PDF sans téléphones arrivent à l\'étape F.</p></div>';
+  h += '<div class="carte"><h2>Compte</h2><p class="aide">Connecté : ' + esc((session() || {}).email || '') + '</p><div class="actions"><button class="btn" type="button" id="theme">Mode ' + (document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches) ? 'clair' : 'sombre') + '</button><button class="btn btn-danger" type="button" id="deconnexion">Se déconnecter</button></div></div>';
+  $('#vue').innerHTML = h;
+  if (ro) $$('#form-mariage input, #form-mariage select').forEach(function (x) { x.disabled = true; });
+  $('#form-mariage').addEventListener('submit', function (ev) {
+    ev.preventDefault(); if (ro) return;
+    var err = $('#r-err'), wa = normTel($('#r-wa').value), rel = normTel($('#r-relais').value), pb = [];
+    if (wa && !telValide(wa)) pb.push('WhatsApp de l\'organisateur invalide.'); if (rel && !telValide(rel)) pb.push('Numéro relais invalide.');
+    if (!$('#r-m1').value.trim() || !$('#r-m2').value.trim()) pb.push('Les deux prénoms sont obligatoires.');
+    if (pb.length) { err.innerHTML = pb.map(esc).join('<br>'); err.hidden = false; return; }
+    modifier('mariages', { id: S.m.id }, { marie_1: $('#r-m1').value.trim(), marie_2: $('#r-m2').value.trim(), date_mariage: $('#r-date').value || null, ville: $('#r-ville').value.trim() || null,
+      reponses_jusqu_au: depuisChampLocal($('#r-limite').value), whatsapp_organisateur: wa || null, whatsapp_relais: rel || null, langue: $('#r-langue').value, conservation_jours: parseInt($('#r-conserv').value, 10) || 90 })
+      .then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast('Réglages enregistrés'); return recharger(); }).catch(function (e) { err.textContent = messageErreur(e); err.hidden = false; });
+  });
+  if (admin()) { chargerMembres(); $('#form-membre').addEventListener('submit', ajouterMembre); }
+  var j = $('#exp-json'); if (j) j.addEventListener('click', function () { rpc('admin_donnees', { p_mariage: S.m.id }).then(function (d) { telecharger('sauvegarde-' + S.m.slug + '-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(d, null, 2), 'application/json'); }).catch(echec); });
+  var c = $('#exp-csv'); if (c) c.addEventListener('click', exporterCsv);
+  $('#deconnexion').addEventListener('click', deconnexion);
+  $('#theme').addEventListener('click', function () { var sombre = this.textContent.indexOf('sombre') >= 0, p = stock.lire('preferences') || {}; p.theme = sombre ? 'dark' : 'light'; stock.ecrire('preferences', p); document.documentElement.setAttribute('data-theme', p.theme); vueReglages(); });
+}
+function chargerMembres() {
+  rpc('liste_membres', { p_mariage: S.m.id }).then(function (l) {
+    var moi = (session() || {}).email;
+    $('#membres').innerHTML = '<div class="defile"><table class="donnees"><thead><tr><th>E-mail</th><th>Rôle</th><th></th></tr></thead><tbody>' + l.map(function (mb) {
+      return '<tr><td>' + esc(mb.email) + (mb.nom ? '<br><span class="aide">' + esc(mb.nom) + '</span>' : '') + '</td><td>' + esc({ admin: 'Administrateur', organisateur: 'Organisateur', hote: 'Hôte' }[mb.role]) + '</td><td>' +
+        (mb.email === moi ? '<span class="aide">vous</span>' : '<button class="btn btn-petit btn-danger" type="button" data-retirer="' + esc(mb.user_id) + '" data-email="' + esc(mb.email) + '">Retirer</button>') + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+    $$('[data-retirer]').forEach(function (b) { b.addEventListener('click', function () {
+      confirmer('Retirer de l\'équipe ?', '<p>' + esc(b.getAttribute('data-email')) + ' n\'aura plus accès à ce mariage. Son compte n\'est pas supprimé ; aucune donnée d\'invité n\'est touchée.</p>', 'Retirer', true).then(function (ok) {
+        if (ok) supprimer('membres', { mariage_id: S.m.id, user_id: b.getAttribute('data-retirer') }).then(function () { toast('Accès retiré'); chargerMembres(); }).catch(echec);
+      }); }); });
+  }).catch(echec);
+}
+function ajouterMembre(ev) {
+  ev.preventDefault();
+  var err = $('#mb-err'); err.hidden = true;
+  rpc('ajouter_membre', { p_mariage: S.m.id, p_email: $('#mb-email').value.trim(), p_role: $('#mb-role').value, p_nom: $('#mb-nom').value.trim() || null }).then(function (r) {
+    if (!r.ok) { err.textContent = r.erreur === 'compte_inexistant' ? 'Aucun compte avec cette adresse. Demandez à la personne d\'ouvrir cette page et de se connecter une fois, puis recommencez.' : 'Vous ne pouvez pas changer votre propre rôle.'; err.hidden = false; return; }
+    toast('Membre ajouté'); $('#form-membre').reset(); chargerMembres();
+  }).catch(echec);
+}
+function exporterCsv() {
+  var col = ['Nom', 'Téléphone', 'Relais', 'Groupe', 'Adultes', 'Enfants', 'Table', 'Statut', 'Démo', 'Lien'].concat(S.ev.map(function (e) { return e.titre; })).concat(['Régimes', 'Notes']);
+  var cel = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  var lignes = S.invites.map(function (i) {
+    var t = tableDe(i.table_id);
+    return [i.nom, i.telephone, i.via_relais ? 'oui' : '', nomGroupe(i.groupe), i.adultes, i.enfants, t ? t.nom : '', STATUTS[i.statut], i.demo ? 'oui' : '', lienInvite(i)]
+      .concat(S.ev.map(function (e) { if (i.evenements.indexOf(e.id) < 0) return 'non invité'; var r = S.rep[i.id] && S.rep[i.id][e.id]; return !r ? 'sans réponse' : r.present ? 'présent ' + r.nb_personnes : 'absent'; }))
+      .concat([i.regimes, i.notes]).map(cel).join(';');
+  });
+  telecharger('invites-' + S.m.slug + '.csv', '﻿' + col.map(cel).join(';') + '\n' + lignes.join('\n'), 'text/csv;charset=utf-8');
+}
+
+/* ---------- Nouveau mariage ---------- */
+function formNouveauMariage() {
+  var c = '<div class="deux"><div class="champ"><label for="nm-1">Prénom marié(e) 1</label><input type="text" id="nm-1" maxlength="60" required></div><div class="champ"><label for="nm-2">Prénom marié(e) 2</label><input type="text" id="nm-2" maxlength="60" required></div></div>' +
+    '<div class="deux"><div class="champ"><label for="nm-date">Date <span class="aide">(facultatif)</span></label><input type="date" id="nm-date"></div><div class="champ"><label for="nm-ville">Ville</label><input type="text" id="nm-ville" value="Lubumbashi"></div></div>' +
+    '<div class="champ"><span class="lib">Événements à créer</span><div class="cases"><label class="case"><input type="checkbox" class="nm-ev" value="civil" checked>Cérémonie civile</label><label class="case"><input type="checkbox" class="nm-ev" value="religieux" checked>Cérémonie religieuse</label><label class="case"><input type="checkbox" class="nm-ev" value="soiree" checked>Soirée</label></div></div>' +
+    '<div class="trois"><div class="champ"><label for="nm-tables">Tables</label><input type="number" id="nm-tables" min="0" max="60" value="10"></div><div class="champ"><label for="nm-cap">Places par table</label><select id="nm-cap"><option>8</option><option selected>10</option><option>12</option></select></div></div>' +
+    '<p class="aide">Vous pourrez tout modifier ensuite (lieux, heures, tenues, tables).</p><div class="message erreur" id="nm-err" hidden></div>';
+  var f = ouvrir('Nouveau mariage', c, '<button class="btn btn-plein" type="button" id="nm-ok">Créer le mariage</button>');
+  $('#nm-ok', f).addEventListener('click', function () {
+    var b = this, m1 = $('#nm-1', f).value.trim(), m2 = $('#nm-2', f).value.trim();
+    if (!m1 || !m2) { $('#nm-err', f).textContent = 'Les deux prénoms sont obligatoires.'; $('#nm-err', f).hidden = false; return; }
+    var slug = (norm(m1).split(' ')[0] + '-' + norm(m2).split(' ')[0]).slice(0, 30) + '-' + Math.random().toString(36).slice(2, 6);
+    var nbT = Math.min(60, parseInt($('#nm-tables', f).value, 10) || 0), cap = parseInt($('#nm-cap', f).value, 10);
+    var evs = $$('.nm-ev:checked', f).map(function (x, k) { return { type: x.value, titre: TYPES[x.value], ordre: k + 1 }; });
+    b.disabled = true;
+    rpc('creer_mariage', { p_slug: slug, p_marie_1: m1, p_marie_2: m2, p_ville: $('#nm-ville', f).value.trim() || null, p_date: $('#nm-date', f).value || null }).then(function (id) {
+      var t = []; for (var k = 1; k <= nbT; k++) t.push({ mariage_id: id, nom: String(k), capacite: cap, ordre: k });
+      return Promise.all([evs.length ? inserer('evenements', evs.map(function (e) { return Object.assign({ mariage_id: id }, e); })) : null, t.length ? inserer('tables_salle', t) : null]).then(function () { return id; });
+    }).then(function (id) { fermer(); toast('Mariage créé'); S.onglet = 'programme'; return chargerMariages().then(function () { ouvrirMariage(id); }); })
+      .catch(function (e) { b.disabled = false; $('#nm-err', f).textContent = messageErreur(e); $('#nm-err', f).hidden = false; });
+  });
+}
+
+/* =====================================================================
+   5. CONNEXION ET DÉMARRAGE
+   ===================================================================== */
+var emailSaisi = '';
+$('#form-email').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var b = $('button', this); emailSaisi = $('#email').value.trim().toLowerCase(); b.disabled = true; $('#msg-connexion').hidden = true;
+  var retour = location.origin + location.pathname;
+  authFetch('otp?redirect_to=' + encodeURIComponent(retour), { email: emailSaisi, create_user: true }).then(function () {
+    $('#form-email').hidden = true; $('#form-code').hidden = false;
+    $('#msg-envoye').innerHTML = 'Un e-mail de connexion a été envoyé à <b>' + esc(emailSaisi) + '</b>. Ouvrez le lien qu\'il contient sur ce téléphone. Pensez à regarder dans les spams.';
+  }).catch(function (er) {
+    var m = er.status === 429 ? 'Trop de demandes : patientez quelques minutes avant de redemander un lien.' : er.message;
+    $('#msg-connexion').textContent = m; $('#msg-connexion').hidden = false;
+  }).finally(function () { b.disabled = false; });
+});
+$('#form-code').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var code = $('#code').value.replace(/\D/g, ''); if (!code) return;
+  authFetch('verify', { type: 'email', email: emailSaisi, token: code }).then(function (s) { garderSession(s); demarrer(); })
+    .catch(function () { $('#msg-connexion').textContent = 'Code incorrect ou expiré. Redemandez un lien.'; $('#msg-connexion').hidden = false; });
+});
+$('#autre-email').addEventListener('click', function () { $('#form-code').hidden = true; $('#form-email').hidden = false; });
+$('#btn-mariages').addEventListener('click', function () { if (S.m) { S.m = null; stock.effacer('admin-mariage'); chargerMariages().then(ecranMariages).catch(echec); } else deconnexion(); });
+$$('#onglets button').forEach(function (b) { b.addEventListener('click', function () { S.onglet = b.getAttribute('data-onglet'); S.choisi = null; rendre(); window.scrollTo(0, 0); }); });
+
+function deconnexion() {
+  var s = session();
+  (s ? authFetch('logout', {}, s.access_token).catch(function () {}) : Promise.resolve()).then(function () { stock.effacer('admin-mariage'); afficherConnexion(); });
+}
+
+function lireRetourLien() {  // retour du lien magique : #access_token=…&refresh_token=…
+  if (!location.hash || location.hash.length < 2) return null;
+  var p = new URLSearchParams(location.hash.slice(1));
+  history.replaceState(null, '', location.pathname + location.search);
+  if (p.get('error_description')) return { erreur: p.get('error_code') === 'otp_expired' ? 'Ce lien de connexion a expiré ou a déjà été utilisé. Demandez-en un nouveau.' : p.get('error_description') };
+  if (p.get('access_token')) return { access_token: p.get('access_token'), refresh_token: p.get('refresh_token'), expires_in: p.get('expires_in'), expires_at: p.get('expires_at') ? Number(p.get('expires_at')) : null };
+  return null;
+}
+
+function demarrer() {
+  var retour = lireRetourLien();
+  if (retour && retour.erreur) return afficherConnexion(retour.erreur);
+  if (retour) garderSession(retour);
+  if (!session()) return afficherConnexion();
+  jeton().then(function (j) { return authFetch('user', null, j); }).then(function (u) {
+    var s = session(); s.email = u.email; stock.ecrire(CLE_SESSION, s);
+    return Promise.all([chargerMariages(), rpc('peut_creer_mariage').then(function (v) { S.peutCreer = !!v; })]);
+  }).then(function () {
+    var dernier = stock.lire('admin-mariage');
+    if (dernier && S.mariages.some(function (m) { return m.id === dernier; })) return ouvrirMariage(dernier);
+    if (S.mariages.length === 1) return ouvrirMariage(S.mariages[0].id);
+    ecranMariages();
+  }).catch(function (e) {
+    if (e.reseau) { $('#vue').hidden = false; $('#vue').innerHTML = '<div class="carte">Connexion impossible. Vérifiez le réseau. <button class="btn btn-petit" type="button" onclick="location.reload()">Réessayer</button></div>'; return; }
+    afficherConnexion('Votre session a expiré. Reconnectez-vous.');
+  });
+}
+demarrer();
+})();
+</script>
+</body>
+</html>
