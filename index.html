@@ -97,6 +97,10 @@ a { color: var(--vert); }
 }
 .monogramme::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: .5px solid var(--or); opacity: .55; }
 .monogramme span { transform: translateY(.12em); }
+/* Photo des mariés : arche dorée, le monogramme vient se poser dessus */
+.photo-maries { width: min(17.5rem, 76vw); aspect-ratio: 722 / 1000; margin: 1rem auto 0; padding: 6px; border: 1.5px solid var(--or); border-radius: 999px 999px 22px 22px; background: var(--surface); box-shadow: var(--ombre); }
+.photo-maries img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; border-radius: 999px 999px 17px 17px; background: var(--vert-clair); }
+.avec-photo .monogramme { width: 4.4rem; height: 4.4rem; font-size: 1.9rem; margin-top: -2.3rem; background: var(--fond); z-index: 1; }
 .maries { font-size: 2.55rem; line-height: 1.08; font-weight: 600; margin: .35rem 0 .2rem; color: var(--vert); overflow-wrap: anywhere; }
 .maries .et { display: block; font-size: 2rem; color: var(--or); margin: .1rem 0; }
 .date-ville { margin: .5rem 0 0; font-size: 1.12rem; font-weight: 600; color: var(--encre); }
@@ -133,8 +137,8 @@ a { color: var(--vert); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 3rem; padding: .7rem 1.15rem; border-radius: 12px; border: 1.5px solid var(--vert); background: transparent; color: var(--vert); font-weight: 600; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .btn svg { width: 1.15rem; height: 1.15rem; flex: none; }
 .btn-plein { background: var(--vert); color: var(--surface); }
-:root[data-theme="dark"] .btn-plein { color: #0E1813; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-plein { color: #0E1813; } }
+:root[data-theme="dark"] .btn-plein { color: var(--fond); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-plein { color: var(--fond); } }
 .btn-large { width: 100%; font-size: 1.05rem; min-height: 3.4rem; }
 .btn-petit { min-height: 2.6rem; padding: .45rem .9rem; font-size: .92rem; }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
@@ -150,8 +154,8 @@ a { color: var(--vert); }
 .choix span { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 3.3rem; padding: .55rem .5rem; border-radius: 12px; border: 1.5px solid var(--ligne); background: var(--surface); font-weight: 600; font-size: .95rem; line-height: 1.25; }
 .choix input:checked + span.oui { border-color: var(--vert); background: var(--vert); color: var(--surface); }
 .choix input:checked + span.non { border-color: var(--rouge); background: var(--rouge-fond); color: var(--rouge); }
-:root[data-theme="dark"] .choix input:checked + span.oui { color: #0E1813; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .choix input:checked + span.oui { color: #0E1813; } }
+:root[data-theme="dark"] .choix input:checked + span.oui { color: var(--fond); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .choix input:checked + span.oui { color: var(--fond); } }
 .choix input:focus-visible + span { outline: 3px solid var(--or); outline-offset: 2px; }
 .detail { margin-top: .9rem; display: grid; gap: .75rem; }
 .detail[hidden] { display: none; }
@@ -510,8 +514,10 @@ function rendreInvitation() {
 
   var h = '';
   // En-tête
-  h += '<header class="entete">' +
+  var photo = m.photo && /^(photos\/[A-Za-z0-9._-]+|https:\/\/)/.test(m.photo) ? m.photo : null;
+  h += '<header class="entete' + (photo ? ' avec-photo' : '') + '">' +
          '<p class="surtitre">' + esc(t('surtitre')) + '</p>' +
+         (photo ? '<figure class="photo-maries" style="margin-bottom:0"><img src="' + esc(photo) + '" alt="' + esc(m.marie_1 + ' et ' + m.marie_2) + '" width="722" height="1000" decoding="async" fetchpriority="high" onerror="this.parentNode.remove()"></figure>' : '') +
          '<div class="monogramme script" aria-hidden="true"><span>' + esc(initiale(m.marie_1)) + '&thinsp;' + esc(initiale(m.marie_2)) + '</span></div>' +
          '<h1 class="maries serif">' + esc(m.marie_1) + '<span class="et script">' + esc(t('et')) + '</span>' + esc(m.marie_2) + '</h1>' +
          '<p class="date-ville">' + esc(dateTxt) + (m.ville ? '<small>' + esc(m.ville) + '</small>' : '') + '</p>' +
@@ -559,10 +565,31 @@ function rendreInvitation() {
   brancherReglages();
 }
 
+/* Thème de couleurs du mariage (facultatif). Seules des couleurs #RRGGBB sont acceptées.
+   Le mode « contraste élevé » garde toujours la priorité. */
+var VARS_THEME = { fond: '--fond', surface: '--surface', encre: '--encre', encre2: '--encre-2', principal: '--vert', principal_clair: '--vert-clair', accent: '--or', accent_texte: '--or-texte', ligne: '--ligne' };
+function couleur(h) { return typeof h === 'string' && /^#[0-9A-Fa-f]{6}$/.test(h) ? h : null; }
+function blocVars(jeu) {
+  if (!jeu || typeof jeu !== 'object') return '';
+  return Object.keys(VARS_THEME).map(function (k) { var c = couleur(jeu[k]); return c ? VARS_THEME[k] + ':' + c + ';' : ''; }).join('');
+}
+function appliquerTheme(theme) {
+  var st = document.getElementById('theme-mariage'); if (st) st.remove();
+  var meta = document.querySelector('meta[name=theme-color]');
+  if (!theme) { meta.setAttribute('content', '#1F3A2E'); return; }
+  var c = blocVars(theme.clair), d = blocVars(theme.sombre), css = '';
+  if (c) css += ':root:not([data-contraste="1"]){' + c + '}';
+  if (d) css += '@media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-contraste="1"]){' + d + '}}:root[data-theme="dark"]:not([data-contraste="1"]){' + d + '}';
+  if (!css) return;
+  st = document.createElement('style'); st.id = 'theme-mariage'; st.textContent = css; document.head.appendChild(st);
+  var p = theme.clair && couleur(theme.clair.principal); if (p) meta.setAttribute('content', p);
+}
+function couleurQR() { var t = D && D.mariage && D.mariage.theme; return (t && couleur(t.qr)) || '#14281F'; }
+
 function rendreQR() {
   var zone = $('#qr'); if (!zone) return;
   if (!window.QR) { setTimeout(rendreQR, 120); return; }   // qr.js chargé en différé
-  zone.innerHTML = window.QR.svg(D.invite.qr, { taille: 240, marge: 2, couleur: '#14281F', fond: '#FFFFFF', label: t('pass_titre') });
+  zone.innerHTML = window.QR.svg(D.invite.qr, { taille: 240, marge: 2, couleur: couleurQR(), fond: '#FFFFFF', label: t('pass_titre') });
 }
 
 function rendreZoneReponse() {
@@ -797,6 +824,7 @@ function afficher(donnees, depuisCache) {
   document.documentElement.lang = LANGUE;
   if (D.etat === 'annulee') { stock.effacer(CLE_CACHE); return rendreEtat('annulee'); }
   if (D.etat !== 'ok') { stock.effacer(CLE_CACHE); return rendreEtat('inconnue'); }
+  appliquerTheme(D.mariage && D.mariage.theme);
   definirDemo(MODE_DEMO || !!D.invite.demo);
   initialiserChoix();
   rendreInvitation();

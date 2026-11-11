@@ -965,6 +965,8 @@ function vueReglages() {
     '<div class="champ"><label for="r-limite">Date limite des réponses <span class="aide">(facultatif — au-delà, l\'invité ne peut plus répondre ni modifier)</span></label><input type="datetime-local" id="r-limite" value="' + esc(versChampLocal(m.reponses_jusqu_au)) + '"></div>' +
     '<div class="deux"><div class="champ"><label for="r-wa">WhatsApp de l\'organisateur <span class="aide">(bouton « Contacter » de l\'invitation, public)</span></label><input type="tel" id="r-wa" value="' + esc(m.whatsapp_organisateur || '') + '" placeholder="+243…"></div>' +
     '<div class="champ"><label for="r-relais">Numéro relais <span class="aide">(reçoit les invitations des invités sans téléphone)</span></label><input type="tel" id="r-relais" value="' + esc(m.whatsapp_relais || '') + '" placeholder="+243…"></div></div>' +
+    '<div class="champ"><label for="r-photo">Photo des mariés <span class="aide">(fichier déposé dans le dossier photos/ du dépôt, ex. photos/emmanuel-gloria.jpg, ou lien https)</span></label><input type="text" id="r-photo" maxlength="300" value="' + esc(m.photo_url || '') + '" placeholder="photos/prenom1-prenom2.jpg"></div>' +
+    '<div class="champ"><span class="lib">Couleurs de l\'invitation</span>' + apercuTheme(m.theme) + '</div>' +
     '<div class="deux"><div class="champ"><label for="r-langue">Langue des invitations</label><select id="r-langue"><option value="fr">Français</option><option value="ln"' + (m.langue === 'ln' ? ' selected' : '') + '>Lingala (traduction à compléter)</option><option value="sw"' + (m.langue === 'sw' ? ' selected' : '') + '>Swahili (traduction à compléter)</option></select></div>' +
     '<div class="champ"><label for="r-conserv">Conservation des données (jours après le mariage)</label><input type="number" id="r-conserv" min="1" max="3650" value="' + m.conservation_jours + '"></div></div>' +
     '<div class="message erreur" id="r-err" hidden></div>' + (ro ? '' : '<button class="btn btn-plein" style="margin-top:1rem" type="submit">Enregistrer</button>') + '</form>';
@@ -980,16 +982,30 @@ function vueReglages() {
     var err = $('#r-err'), wa = normTel($('#r-wa').value), rel = normTel($('#r-relais').value), pb = [];
     if (wa && !telValide(wa)) pb.push('WhatsApp de l\'organisateur invalide.'); if (rel && !telValide(rel)) pb.push('Numéro relais invalide.');
     if (!$('#r-m1').value.trim() || !$('#r-m2').value.trim()) pb.push('Les deux prénoms sont obligatoires.');
+    var photo = $('#r-photo').value.trim();
+    if (photo && !/^(photos\/[A-Za-z0-9._-]{1,80}|https:\/\/[^\s"<>]{8,292})$/.test(photo)) pb.push('Photo : indiquez photos/nom-du-fichier.jpg (sans espace ni accent) ou un lien https.');
     if (pb.length) { err.innerHTML = pb.map(esc).join('<br>'); err.hidden = false; return; }
     modifier('mariages', { id: S.m.id }, { marie_1: $('#r-m1').value.trim(), marie_2: $('#r-m2').value.trim(), date_mariage: $('#r-date').value || null, ville: $('#r-ville').value.trim() || null,
-      reponses_jusqu_au: depuisChampLocal($('#r-limite').value), whatsapp_organisateur: wa || null, whatsapp_relais: rel || null, langue: $('#r-langue').value, conservation_jours: parseInt($('#r-conserv').value, 10) || 90 })
+      reponses_jusqu_au: depuisChampLocal($('#r-limite').value), whatsapp_organisateur: wa || null, whatsapp_relais: rel || null, photo_url: photo || null, langue: $('#r-langue').value, conservation_jours: parseInt($('#r-conserv').value, 10) || 90 })
       .then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast('Réglages enregistrés'); return recharger(); }).catch(function (e) { err.textContent = messageErreur(e); err.hidden = false; });
   });
   if (admin()) { chargerMembres(); $('#form-membre').addEventListener('submit', ajouterMembre); }
+  var to = $('#theme-origine');
+  if (to) to.addEventListener('click', function () {
+    confirmer('Revenir au thème d\'origine ?', '<p>Les invitations de ce mariage reprendront les couleurs vert et or. Le thème « ' + esc(S.m.theme.nom || 'personnalisé') + ' » sera retiré (je peux le recréer à partir de la palette).</p>', 'Revenir au vert et or')
+      .then(function (go) { if (go) modifier('mariages', { id: S.m.id }, { theme: null }).then(function () { toast('Thème d\'origine rétabli'); return recharger(); }).catch(echec); });
+  });
   var j = $('#exp-json'); if (j) j.addEventListener('click', function () { rpc('admin_donnees', { p_mariage: S.m.id }).then(function (d) { telecharger('sauvegarde-' + S.m.slug + '-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(d, null, 2), 'application/json'); }).catch(echec); });
   var c = $('#exp-csv'); if (c) c.addEventListener('click', exporterCsv);
   $('#deconnexion').addEventListener('click', deconnexion);
   $('#theme').addEventListener('click', function () { var sombre = this.textContent.indexOf('sombre') >= 0, p = stock.lire('preferences') || {}; p.theme = sombre ? 'dark' : 'light'; stock.ecrire('preferences', p); document.documentElement.setAttribute('data-theme', p.theme); vueReglages(); });
+}
+function apercuTheme(t) {
+  if (!t || !t.clair) return '<span class="aide">Thème d\'origine (vert et or).</span>';
+  var ok = function (h) { return /^#[0-9A-Fa-f]{6}$/.test(h || '') ? h : '#ffffff'; };
+  var pastilles = ['principal', 'accent', 'principal_clair', 'fond'].map(function (k) { return '<span title="' + k + '" style="display:inline-block;width:1.9rem;height:1.9rem;border-radius:50%;border:1px solid var(--ligne);background:' + ok(t.clair[k]) + '"></span>'; }).join(' ');
+  return '<div class="actions" style="align-items:center">' + pastilles + '<span class="aide">' + esc(t.nom || 'Thème personnalisé') + ' — contrastes vérifiés</span>' +
+         (admin() ? '<button class="btn btn-petit" type="button" id="theme-origine">Revenir au vert et or</button>' : '') + '</div>';
 }
 function chargerMembres() {
   rpc('liste_membres', { p_mariage: S.m.id }).then(function (l) {
