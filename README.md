@@ -1,4 +1,5 @@
 # Invitations de mariage — Jadik'Art
+
 Application web d'invitations de mariage personnelles, conçue par **Jadik'Art Design Studio** (Lubumbashi).
 Un même site sert pour plusieurs mariages : chaque invité reçoit son propre lien.
 
@@ -14,16 +15,19 @@ Un même site sert pour plusieurs mariages : chaque invité reçoit son propre l
 |---|---|
 | Invitation d'un invité | `/?i=code-de-l-invite` |
 | Démonstration (filigrane, rien n'est enregistré) | `/?demo=1` |
+| Administration (connexion requise) | `/admin.html` |
 
 ## Fichiers
 | Fichier | Rôle |
 |---|---|
 | `index.html` | La page d'invitation (textes, style et fonctionnement) |
+| `admin.html` | L'administration : mariages, invités, plan de salle, équipe (accès par connexion e-mail) |
 | `qr.js` | Génération du QR code (d'après Kazuhiko Arase, licence MIT) |
 
 ## Sécurité
 - La page ne contient que la clé **publique** de la base de données. Aucune clé secrète ni aucun mot de passe ne doit être ajouté dans ce dépôt.
-- Un invité ne peut lire que sa propre invitation ; la liste des invités et leurs téléphones ne sont jamais accessibles depuis cette page.
+- Un invité ne peut lire que sa propre invitation ; la liste des invités et leurs téléphones ne sont jamais accessibles depuis la page publique.
+- L'administration n'affiche rien sans connexion. Les droits (administrateur, organisateur, hôte) sont contrôlés par la base elle-même, pas par la page.
 
 ## Hébergement
 Déployé automatiquement sur Vercel à chaque modification de la branche `main`.
