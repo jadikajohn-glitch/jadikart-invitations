@@ -320,6 +320,9 @@ details.pratique .corps { display: grid; gap: .6rem; padding-top: .5rem; }
 .ci-bienvenue { text-align: center; padding: 1.8rem 1.4rem 2rem; background: var(--fond); }
 .ci-surtitre { margin: 0 0 .7rem; font-size: .82rem; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--encre2); }
 .ci-salut { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: 2.6rem; line-height: 1.1; color: var(--encre); }
+.ci-pastilles { margin: .9rem -.6rem 0; flex-wrap: nowrap; gap: .35rem; }
+@media (max-width: 330px) { .ci-pastilles { flex-wrap: wrap; } }
+.ci-pastilles .pastille { font-size: clamp(.66rem, 3vw, .9rem); padding: .32rem clamp(.45rem, 2vw, .8rem); white-space: nowrap; background: var(--surface); box-shadow: 0 2px 6px rgba(18, 34, 77, .06); }
 .ci-bienvenue hr { border: 0; border-top: 1px solid var(--dore); width: 70%; margin: 1.3rem auto 1.4rem; opacity: .8; }
 .ci-intro { margin: 0 auto 1.2rem; max-width: 26rem; font-size: 1.02rem; line-height: 1.75; color: var(--encre); }
 .ci-intro strong { font-weight: 700; letter-spacing: .02em; }
@@ -1037,18 +1040,20 @@ function carteImageHtml(m, inv, evs, photo, detailPers) {
           : '<span class="ci-ajuste">' + esc(m.marie_1) + ' <span class="et">' + esc(t('et')) + '</span> ' + esc(m.marie_2) + '</span>') + '</h1>' + bloc + '</div>' +
     '</div>' +
     '<div class="ci-bienvenue">' +
-      '<p class="ci-surtitre">' + esc(t('ci_bienvenue')) + '</p><h2 class="ci-salut">' + esc(t('ci_salut')) + '</h2><hr>' +
+      '<p class="ci-surtitre">' + esc(t('ci_bienvenue')) + '</p><h2 class="ci-salut">' + esc(t('ci_salut')) + '</h2>' +
+      /* Personnes et table juste sous « Cher invité(e) » (maquette de Jad, 23/11) */
+      '<div class="pastilles ci-pastilles"><span class="pastille">' + icone('personnes') + esc(tPersonnes(inv.total)) + detailPers + '</span>' +
+      '<span class="pastille">' + icone('table') + esc(inv.table ? t('table', { t: inv.table }) : t('table_a_venir')) + '</span></div><hr>' +
       '<p class="ci-intro">' + intro + '</p>' +
       '<p class="ci-couple">' + esc(m.marie_1) + ' <span class="ci-coeur" aria-hidden="true">💕</span><span class="sr"> ' + esc(t('et')) + ' </span> ' + esc(m.marie_2) + '</p>' +
       '<p class="ci-quand">' + esc(quand) + '</p><p class="ci-cordial">' + esc(t('ci_cordial')) + '</p>' +
     '</div>' +
     '<div class="ci-carte">' +
       '<p class="fp-pour">' + esc(t('a_lattention')) + '</p><p class="ci-invite-nom" id="nom-invite">' + esc(inv.nom) + '</p><hr>' +
-      '<div class="ci-infos">' + (m.date ? '' : info('calendrier', t('fp_date'), t('date_a_definir'))) /* la date est déjà en grand au-dessus */ + info('horloge', t('fp_heure'), heure) + info('lieu', t('fp_lieu'), lieu) +
-        (adresse ? '<span class="ci-info ci-info-libre"><span class="ci-val ci-ajuste">' + esc(adresse) + '</span></span>' : '') + '</div>' +
+      /* Heure, lieu et adresse retirés (demande de Jad, 23/11) : ils figurent déjà dans le Programme juste en dessous.
+         La date ne revient ici que si le mariage n'en a pas encore. */
+      (m.date ? '' : '<div class="ci-infos">' + info('calendrier', t('fp_date'), t('date_a_definir')) + '</div>') +
       (soiree ? '<p class="ci-suite">' + esc(t('fp_reception')) + '</p>' : '') +
-      '<div class="pastilles"><span class="pastille">' + icone('personnes') + esc(tPersonnes(inv.total)) + detailPers + '</span>' +
-      '<span class="pastille">' + icone('table') + esc(inv.table ? t('table', { t: inv.table }) : t('table_a_venir')) + '</span></div>' +
     '</div>' +
   '</section>';
 }
