@@ -988,7 +988,7 @@ function carteImageHtml(m, inv, evs, photo, detailPers) {
   var premier = evs.filter(function (e) { return e.debut; }).sort(function (a, b) { return a.debut < b.debut ? -1 : 1; })[0] || evs[0];
   var heure = premier && premier.debut ? fmtDateHeure(premier.debut, { hour: '2-digit', minute: '2-digit' }).replace(':', ' h ') : t('a_confirmer');
   var lieu = premier && premier.lieu ? premier.lieu : t('a_communiquer');
-  var adresse = [premier && premier.adresse, m.ville].filter(Boolean).filter(function (x, k, l) { return l.indexOf(x) === k && lieu.indexOf(x) < 0; }).join(', ');
+  var adresse = [premier && premier.adresse, m.ville].filter(Boolean).filter(function (x, k, l) { return l.indexOf(x) === k && lieu.indexOf(x) < 0 && (k === 0 || String(l[0]).indexOf(x) < 0); }).join(', ');
   var soiree = evs.some(function (e) { return e.type === 'soiree'; });
   var bloc;
   if (m.date) {
@@ -1086,11 +1086,6 @@ function rendreZoneReponse() {
   h += '<p class="intro">' + esc(t('reponse_intro')) + '</p>';
   h += '<form id="form-reponse" novalidate>';
   D.evenements.forEach(function (e, idx) { h += blocEvenementHtml(e, idx); });
-  h += '<details class="pratique"' + (INFOS.regimes || INFOS.transport || INFOS.logement ? ' open' : '') + '><summary>' + esc(t('pratique')) + '</summary><div class="corps">' +
-         '<div class="champ"><label for="regimes">' + esc(t('regimes')) + '</label><input type="text" id="regimes" maxlength="300" autocomplete="off" placeholder="' + esc(t('regimes_ph')) + '" value="' + esc(INFOS.regimes) + '"></div>' +
-         '<label class="case"><input type="checkbox" id="transport"' + (INFOS.transport ? ' checked' : '') + '>' + esc(t('transport')) + '</label>' +
-         '<label class="case"><input type="checkbox" id="logement"' + (INFOS.logement ? ' checked' : '') + '>' + esc(t('logement')) + '</label>' +
-       '</div></details>';
   h += '<p class="consentement">' + esc(t('consentement')) + '</p>';
   h += '<button class="btn btn-plein btn-large" type="submit" id="btn-envoyer">' + esc(t('envoyer')) + '</button>';
   h += '<div class="alerte erreur" id="msg-erreur" role="alert" hidden></div>';
@@ -1164,9 +1159,7 @@ function brancherFormulaire() {
     D.evenements.slice(1).forEach(function (e) { CHOIX[e.id] = { present: premier.present, nb: premier.nb, prenoms: premier.prenoms.slice(), message: CHOIX[e.id].message || '' }; });
     sauverBrouillon(); rendreZoneReponse();
   });
-  $('#regimes').addEventListener('input', function (e) { INFOS.regimes = e.target.value; sauverBrouillon(); });
-  $('#transport').addEventListener('change', function (e) { INFOS.transport = e.target.checked; sauverBrouillon(); });
-  $('#logement').addEventListener('change', function (e) { INFOS.logement = e.target.checked; sauverBrouillon(); });
+  // Bloc « Informations pratiques » retiré à la demande de Jad (23/11) : plus de régimes, transport ni logement.
   $('#form-reponse').addEventListener('submit', function (ev) { ev.preventDefault(); envoyer(); });
 }
 
