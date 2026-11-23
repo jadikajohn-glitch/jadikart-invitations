@@ -281,7 +281,13 @@ function normTel(t) {
 }
 function telValide(t) { return /^\+[0-9]{9,15}$/.test(t); }
 function lienWa(num, texte) { var n = String(num || '').replace(/[^0-9]/g, ''); return 'https://wa.me/' + n + '?text=' + encodeURIComponent(texte); }
-function lienInvite(i) { return location.origin + location.pathname.replace(/admin\.html$/, '').replace(/\/?$/, '/') + '?i=' + i.code; }
+// Lien personnel : adresse propre au mariage si elle est réglée (ex. https://emman-gloria.vercel.app), sinon ce site.
+function baseSite() {
+  var a = S.m && S.m.adresse_site;
+  if (a && /^https:\/\/[a-z0-9.-]+$/.test(a)) return a + '/';
+  return location.origin + location.pathname.replace(/admin\.html$/, '').replace(/\/?$/, '/');
+}
+function lienInvite(i) { return baseSite() + '?i=' + i.code; }
 function copier(texte) {
   if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(texte).then(function () { toast('Lien copié'); }, function () { copierSecours(texte); });
   copierSecours(texte);
@@ -421,6 +427,7 @@ function chargerDonnees() {
     if (!d || !d.mariage) throw new Error('Mariage introuvable ou accès retiré.');
     S.m = d.mariage; S.role = d.role; S.ev = d.evenements; S.tables = d.tables; S.invites = d.invites; S.rep = {};
     d.reponses.forEach(function (r) { (S.rep[r.invite_id] = S.rep[r.invite_id] || {})[r.evenement_id] = r; });
+    S.boissons = d.boissons || []; S.livre = d.livre_or || [];
     S.chargeLe = new Date();
   });
 }
@@ -507,6 +514,7 @@ function vueApercu() {
 
   // Alertes
   h += '<div class="carte"><h2>Points à vérifier</h2><ul class="alertes">' + alertes().map(function (a) { return '<li class="' + a.niv + '">' + a.html + '</li>'; }).join('') + '</ul></div>';
+  h += carteBoissons() + carteLivre();
   $('#vue').innerHTML = h;
   $('#actualiser').addEventListener('click', function () { recharger().then(function () { toast('Données actualisées'); }); });
   $('#appliquer').addEventListener('click', function () {
@@ -514,6 +522,32 @@ function vueApercu() {
     rpc('appliquer_reponses', { p_mariage: S.m.id }).then(function (r) { toast(pluriel(r.mis_a_jour, 'statut mis à jour', 'statuts mis à jour')); return recharger(); }).catch(echec).finally(function () { b.disabled = false; });
   });
   $$('[data-voir]').forEach(function (b) { b.addEventListener('click', function () { formInvite(b.getAttribute('data-voir')); }); });
+  $$('[data-masquer]').forEach(function (b) { b.addEventListener('click', function () {
+    var id = b.getAttribute('data-masquer'), masquer = b.getAttribute('data-etat') !== 'masque';
+    b.disabled = true;
+    modifier('livre_or', { id: id }, { masque: masquer }).then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast(masquer ? 'Message masqué' : 'Message affiché'); return recharger(); }).catch(echec);
+  }); });
+}
+function carteBoissons() {
+  if (!S.m.boissons) return '<div class="carte"><h2>Boissons</h2><p class="aide">Le choix des boissons n\'est pas proposé aux invités. Activez-le dans Réglages.</p></div>';
+  var parInvite = {}; S.boissons.forEach(function (b) { parInvite[b.invite_id] = b.choix; });
+  var lignes = [], total = 0;
+  (S.m.boissons.groupes || []).forEach(function (g) { g.choix.forEach(function (c) {
+    var qui = S.invites.filter(function (i) { return reel(i) && (parInvite[i.id] || []).indexOf(c) >= 0; });
+    lignes.push({ g: g.nom, c: c, n: qui.length, ad: qui.reduce(function (s, i) { return s + i.adultes; }, 0) });
+  }); });
+  var repondu = S.invites.filter(function (i) { return reel(i) && parInvite[i.id]; }).length; total = S.invites.filter(reel).length;
+  return '<div class="carte"><h2>Boissons choisies</h2><p class="compte">' + repondu + ' / ' + pluriel(total, 'invitation a choisi', 'invitations ont choisi') + ' (' + S.m.boissons.max + ' choix maximum). Le calcul des casiers à commander arrive à l\'étape G.</p>' +
+    '<div class="defile"><table class="donnees"><thead><tr><th>Boisson</th><th>Catégorie</th><th class="n">Invitations</th><th class="n">Adultes concernés</th></tr></thead><tbody>' +
+    lignes.sort(function (a, b) { return b.n - a.n; }).map(function (l) { return '<tr><td>' + esc(l.c) + '</td><td>' + esc(l.g) + '</td><td class="n"><b>' + l.n + '</b></td><td class="n">' + l.ad + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
+}
+function carteLivre() {
+  var l = S.livre || [];
+  return '<div class="carte"><h2>Livre d\'or</h2>' + (l.length ? '<p class="compte">' + pluriel(l.length, 'message', 'messages') + '. Chaque invité ne voit que ses propres messages. Un message masqué sera exclu de l\'album final et des exports.</p>' : '<p class="aide">Aucun message pour l\'instant.</p>') +
+    '<ul class="liste">' + l.map(function (m) {
+      return '<li class="invite' + (m.masque ? ' annulee' : '') + '"><div class="ligne1"><b>' + esc(m.auteur) + '</b>' + (m.masque ? '<span class="badge b-annulee">Masqué</span>' : '') + '</div><div>' + esc(m.message) + '</div>' +
+        '<div class="meta"><span>' + esc(fmtDH(m.le)) + '</span></div>' + (gestion() ? '<div class="actions"><button class="btn btn-petit" type="button" data-masquer="' + esc(m.id) + '" data-etat="' + (m.masque ? 'masque' : 'visible') + '">' + (m.masque ? 'Afficher' : 'Masquer') + '</button></div>' : '') + '</li>';
+    }).join('') + '</ul></div>';
 }
 function stat(v, lib, alerte) { return '<div class="stat' + (alerte ? ' alerte' : '') + '"><b>' + esc(v) + '</b><span>' + esc(lib) + '</span></div>'; }
 function lienVoir(i) { return '<button class="lien" type="button" data-voir="' + esc(i.id) + '">' + esc(i.nom) + '</button>'; }
@@ -927,18 +961,24 @@ function formEvenement(e) {
     '<div class="champ"><label for="e-lieu">Lieu</label><input type="text" id="e-lieu" maxlength="120" value="' + esc(v.lieu || '') + '" placeholder="Ex. Maison communale de Kampemba"></div>' +
     '<div class="champ"><label for="e-adr">Adresse</label><input type="text" id="e-adr" maxlength="200" value="' + esc(v.adresse || '') + '"></div>' +
     '<div class="champ"><label for="e-maps">Lien Google Maps <span class="aide">(facultatif, sinon recherche par adresse)</span></label><input type="url" id="e-maps" value="' + esc(v.maps_url || '') + '" placeholder="https://maps.app.goo.gl/…"></div>' +
-    '<div class="champ"><label for="e-tenue">Tenue demandée</label><input type="text" id="e-tenue" maxlength="120" value="' + esc(v.tenue || '') + '"></div>';
+    '<div class="champ"><label for="e-tenue">Tenue demandée</label><input type="text" id="e-tenue" maxlength="120" value="' + esc(v.tenue || '') + '"></div>' +
+    '<div class="champ"><label for="e-coul">Couleurs de la tenue <span class="aide">(codes #RRGGBB séparés par des virgules, 8 au maximum)</span></label><input type="text" id="e-coul" value="' + esc((v.couleurs || []).join(', ')) + '" placeholder="#CA497F, #F0B2C9"><div class="puces" id="e-coul-apercu" style="margin-top:.4rem"></div></div>';
   if (!e && S.invites.length) c += '<label class="case"><input type="checkbox" id="e-tous" checked>Inviter tous les invités actuels à cet événement (' + S.invites.filter(compte).length + ')</label>';
   c += '<div class="message erreur" id="e-err" hidden></div>';
   var f = ouvrir(e ? e.titre : 'Nouvel événement', c, (e && admin() ? '<button class="btn btn-danger" type="button" id="e-suppr">Supprimer</button>' : '') + (gestion() ? '<button class="btn btn-plein" type="button" id="e-ok">Enregistrer</button>' : ''));
   if (!gestion()) $$('input,select', f).forEach(function (x) { x.disabled = true; });
   $('#e-type', f).addEventListener('change', function () { $('#e-titre', f).placeholder = TYPES[this.value]; });
+  function lireCouleurs() { var t = $('#e-coul', f).value.trim(); return t ? t.split(/[\s,;]+/).filter(Boolean).map(function (x) { return (x.charAt(0) === '#' ? x : '#' + x).toUpperCase(); }) : []; }
+  function apercuCouleurs() { $('#e-coul-apercu', f).innerHTML = lireCouleurs().map(function (x) { return /^#[0-9A-F]{6}$/.test(x) ? '<span class="puce" style="background:' + x + ';width:1.8rem;height:1.8rem;border-radius:50%;padding:0" title="' + x + '"></span>' : '<span class="puce non">' + esc(x) + ' ?</span>'; }).join(''); }
+  $('#e-coul', f).addEventListener('input', apercuCouleurs); apercuCouleurs();
   var ok = $('#e-ok', f);
   if (ok) ok.addEventListener('click', function () {
     var maps = $('#e-maps', f).value.trim();
     if (maps && !/^https:\/\//.test(maps)) { $('#e-err', f).textContent = 'Le lien Maps doit commencer par https://'; $('#e-err', f).hidden = false; return; }
+    var coul = lireCouleurs();
+    if (coul.length > 8 || coul.some(function (x) { return !/^#[0-9A-F]{6}$/.test(x); })) { $('#e-err', f).textContent = 'Couleurs : codes au format #RRGGBB (ex. #CA497F), 8 au maximum.'; $('#e-err', f).hidden = false; return; }
     var ch = { type: $('#e-type', f).value, titre: $('#e-titre', f).value.trim() || TYPES[$('#e-type', f).value], ordre: parseInt($('#e-ordre', f).value, 10) || 0,
-      debut: depuisChampLocal($('#e-debut', f).value), lieu: $('#e-lieu', f).value.trim() || null, adresse: $('#e-adr', f).value.trim() || null, maps_url: maps || null, tenue: $('#e-tenue', f).value.trim() || null };
+      debut: depuisChampLocal($('#e-debut', f).value), lieu: $('#e-lieu', f).value.trim() || null, adresse: $('#e-adr', f).value.trim() || null, maps_url: maps || null, tenue: $('#e-tenue', f).value.trim() || null, couleurs: coul.length ? coul : null };
     ok.disabled = true;
     var tous = $('#e-tous', f) && $('#e-tous', f).checked;
     (e ? modifier('evenements', { id: e.id }, ch) : inserer('evenements', [Object.assign({ mariage_id: S.m.id }, ch)]).then(function (r) {
@@ -967,11 +1007,14 @@ function vueReglages() {
     '<div class="champ"><label for="r-relais">Numéro relais <span class="aide">(reçoit les invitations des invités sans téléphone)</span></label><input type="tel" id="r-relais" value="' + esc(m.whatsapp_relais || '') + '" placeholder="+243…"></div></div>' +
     '<div class="deux"><div class="champ"><label for="r-intitule">Intitulé <span class="aide">(ex. Mariage coutumier)</span></label><input type="text" id="r-intitule" maxlength="40" value="' + esc(m.intitule || '') + '" placeholder="Mariage"></div>' +
     '<div class="champ"><label for="r-familles">Familles <span class="aide">(ex. Mugayo et Ngoy)</span></label><input type="text" id="r-familles" maxlength="120" value="' + esc(m.familles || '') + '"></div></div>' +
+    '<div class="champ"><label for="r-site">Adresse du site pour ce mariage <span class="aide">(facultatif, ex. https://emman-gloria.vercel.app — à ajouter d\'abord dans Vercel, onglet Domains)</span></label><input type="url" id="r-site" maxlength="100" value="' + esc(m.adresse_site || '') + '" placeholder="https://prenom1-prenom2.vercel.app"></div>' +
     '<div class="champ"><label for="r-photo">Photo des mariés <span class="aide">(fichier déposé dans le dossier photos/ du dépôt, ex. photos/emmanuel-gloria.jpg, ou lien https)</span></label><input type="text" id="r-photo" maxlength="300" value="' + esc(m.photo_url || '') + '" placeholder="photos/prenom1-prenom2.jpg"></div>' +
     '<div class="champ"><label for="r-credit">Crédit photo <span class="aide">(nom du photographe, affiché en bas de l\'invitation)</span></label><input type="text" id="r-credit" maxlength="60" value="' + esc(m.credit_photo || '') + '"></div>' +
     '<div class="champ"><span class="lib">Couleurs de l\'invitation</span>' + apercuTheme(m.theme) + '</div>' +
     '<div class="deux"><div class="champ"><label for="r-langue">Langue des invitations</label><select id="r-langue"><option value="fr">Français</option><option value="ln"' + (m.langue === 'ln' ? ' selected' : '') + '>Lingala (traduction à compléter)</option><option value="sw"' + (m.langue === 'sw' ? ' selected' : '') + '>Swahili (traduction à compléter)</option></select></div>' +
     '<div class="champ"><label for="r-conserv">Conservation des données (jours après le mariage)</label><input type="number" id="r-conserv" min="1" max="3650" value="' + m.conservation_jours + '"></div></div>' +
+    '<div class="champ"><label for="r-modele">Modèle d\'invitation</label><select id="r-modele"><option value="classique">Classique — photo en plein écran</option><option value="faire-part"' + (m.modele === 'faire-part' ? ' selected' : '') + '>Faire-part — cadre doré, calligraphie, fleurs</option><option value="carte"' + (m.modele === 'carte' ? ' selected' : '') + '>Carte illustrée — votre image en fondu, noms et date dessus</option></select><span class="aide">Carte illustrée : l\'image du champ « Photo » s\'affiche en entier et se fond vers le bas ; l\'intitulé, les noms et la date (jour | numéro | année, mois dessous) sont posés sur ce fondu. La carte dorée en dessous donne le nom de l\'invité, le texte, l\'heure et le lieu.</span></div>' +
+    champsBoissons(m.boissons) +
     '<div class="message erreur" id="r-err" hidden></div>' + (ro ? '' : '<button class="btn btn-plein" style="margin-top:1rem" type="submit">Enregistrer</button>') + '</form>';
   if (admin()) h += '<div class="carte"><h2>Équipe</h2><p class="aide">Organisateur : invités, tables et exports. Hôte d\'accueil : scan et recherche le jour J, sans voir les téléphones. La personne doit d\'abord ouvrir cette page et se connecter une fois avec son adresse.</p><div id="membres">Chargement…</div>' +
     '<form id="form-membre" class="trois"><div class="champ"><label for="mb-email">E-mail</label><input type="email" id="mb-email" required></div><div class="champ"><label for="mb-role">Rôle</label><select id="mb-role"><option value="organisateur">Organisateur</option><option value="hote">Hôte d\'accueil</option><option value="admin">Administrateur</option></select></div><div class="champ"><label for="mb-nom">Prénom</label><input type="text" id="mb-nom" maxlength="40"></div></form>' +
@@ -979,17 +1022,22 @@ function vueReglages() {
   if (gestion()) h += '<div class="carte"><h2>Exports et sauvegarde</h2><div class="actions"><button class="btn" type="button" id="exp-json">Sauvegarde complète (JSON)</button><button class="btn" type="button" id="exp-csv">Liste des invités (CSV)</button></div><p class="aide">Ces fichiers contiennent les numéros de téléphone : ne les partagez pas. Les listes PDF sans téléphones arrivent à l\'étape F.</p></div>';
   h += '<div class="carte"><h2>Compte</h2><p class="aide">Connecté : ' + esc((session() || {}).email || '') + '</p><div class="actions"><button class="btn" type="button" id="theme">Mode ' + (document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches) ? 'clair' : 'sombre') + '</button><button class="btn btn-danger" type="button" id="deconnexion">Se déconnecter</button></div></div>';
   $('#vue').innerHTML = h;
-  if (ro) $$('#form-mariage input, #form-mariage select').forEach(function (x) { x.disabled = true; });
+  if (ro) $$('#form-mariage input, #form-mariage select, #form-mariage textarea, #form-mariage button').forEach(function (x) { x.disabled = true; });
+  $('#r-boissons-actif').addEventListener('change', function () { $('#r-boissons').hidden = !this.checked; if (this.checked && !$('#r-b-alcool').value.trim() && !$('#r-b-sans').value.trim()) $('#r-b-defaut').click(); });
+  $('#r-b-defaut').addEventListener('click', function () { $('#r-b-alcool').value = BOISSONS_HABITUELLES.alcool.join('\n'); $('#r-b-sans').value = BOISSONS_HABITUELLES.sans.join('\n'); });
   $('#form-mariage').addEventListener('submit', function (ev) {
     ev.preventDefault(); if (ro) return;
     var err = $('#r-err'), wa = normTel($('#r-wa').value), rel = normTel($('#r-relais').value), pb = [];
     if (wa && !telValide(wa)) pb.push('WhatsApp de l\'organisateur invalide.'); if (rel && !telValide(rel)) pb.push('Numéro relais invalide.');
     if (!$('#r-m1').value.trim() || !$('#r-m2').value.trim()) pb.push('Les deux prénoms sont obligatoires.');
+    var site = $('#r-site').value.trim().toLowerCase().replace(/\/+$/, '');
+    if (site && !/^https:\/\/[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(site)) pb.push('Adresse du site : format attendu https://nom.vercel.app (minuscules, sans espace ni chemin).');
     var photo = $('#r-photo').value.trim();
     if (photo && !/^(photos\/[A-Za-z0-9._-]{1,80}|https:\/\/[^\s"<>]{8,292})$/.test(photo)) pb.push('Photo : indiquez photos/nom-du-fichier.jpg (sans espace ni accent) ou un lien https.');
+    var boissons = lireBoissons(pb);
     if (pb.length) { err.innerHTML = pb.map(esc).join('<br>'); err.hidden = false; return; }
-    modifier('mariages', { id: S.m.id }, { marie_1: $('#r-m1').value.trim(), marie_2: $('#r-m2').value.trim(), date_mariage: $('#r-date').value || null, ville: $('#r-ville').value.trim() || null,
-      reponses_jusqu_au: depuisChampLocal($('#r-limite').value), whatsapp_organisateur: wa || null, whatsapp_relais: rel || null, photo_url: photo || null, intitule: $('#r-intitule').value.trim() || null, familles: $('#r-familles').value.trim() || null, credit_photo: $('#r-credit').value.trim() || null, langue: $('#r-langue').value, conservation_jours: parseInt($('#r-conserv').value, 10) || 90 })
+    modifier('mariages', { id: S.m.id }, { modele: $('#r-modele').value, boissons: boissons, marie_1: $('#r-m1').value.trim(), marie_2: $('#r-m2').value.trim(), date_mariage: $('#r-date').value || null, ville: $('#r-ville').value.trim() || null,
+      reponses_jusqu_au: depuisChampLocal($('#r-limite').value), whatsapp_organisateur: wa || null, whatsapp_relais: rel || null, adresse_site: site || null, photo_url: photo || null, intitule: $('#r-intitule').value.trim() || null, familles: $('#r-familles').value.trim() || null, credit_photo: $('#r-credit').value.trim() || null, langue: $('#r-langue').value, conservation_jours: parseInt($('#r-conserv').value, 10) || 90 })
       .then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast('Réglages enregistrés'); return recharger(); }).catch(function (e) { err.textContent = messageErreur(e); err.hidden = false; });
   });
   if (admin()) { chargerMembres(); $('#form-membre').addEventListener('submit', ajouterMembre); }
@@ -1009,6 +1057,24 @@ function apercuTheme(t) {
   var pastilles = ['principal', 'accent', 'principal_clair', 'fond'].map(function (k) { return '<span title="' + k + '" style="display:inline-block;width:1.9rem;height:1.9rem;border-radius:50%;border:1px solid var(--ligne);background:' + ok(t.clair[k]) + '"></span>'; }).join(' ');
   return '<div class="actions" style="align-items:center">' + pastilles + '<span class="aide">' + esc(t.nom || 'Thème personnalisé') + ' — contrastes vérifiés</span>' +
          (admin() ? '<button class="btn btn-petit" type="button" id="theme-origine">Revenir au vert et or</button>' : '') + '</div>';
+}
+var BOISSONS_HABITUELLES = { alcool: ['Castel', 'Beaufort', 'Tembo', 'Turbo King', 'Heineken', 'Nkoyi', 'Likofi'], sans: ['Coca-Cola', 'Fanta', 'Vitalo', 'Maltina', 'Sprite', 'Energy Malt'] };
+function champsBoissons(b) {
+  var g = (b && b.groupes) || [], av = g[0] ? g[0].choix : [], sa = g[1] ? g[1].choix : [];
+  return '<h3 style="margin-top:1.3rem">Boissons proposées aux invités</h3>' +
+    '<label class="case"><input type="checkbox" id="r-boissons-actif"' + (b ? ' checked' : '') + '>Demander aux invités « Que désirez-vous boire ? »</label>' +
+    '<div id="r-boissons"' + (b ? '' : ' hidden') + '><div class="deux"><div class="champ"><label for="r-b-max">Choix par invitation</label><select id="r-b-max">' + [1, 2, 3].map(function (n) { return '<option' + ((b ? b.max : 2) === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></div>' +
+    '<div class="champ" style="align-self:end"><button class="btn btn-petit" type="button" id="r-b-defaut">Liste habituelle (Lubumbashi)</button></div></div>' +
+    '<div class="deux"><div class="champ"><label for="r-b-alcool">Avec alcool <span class="aide">(une par ligne)</span></label><textarea id="r-b-alcool" rows="7">' + esc(av.join('\n')) + '</textarea></div>' +
+    '<div class="champ"><label for="r-b-sans">Sans alcool <span class="aide">(une par ligne)</span></label><textarea id="r-b-sans" rows="7">' + esc(sa.join('\n')) + '</textarea></div></div></div>';
+}
+function lireBoissons(pb) {
+  if (!$('#r-boissons-actif').checked) return null;
+  var lire = function (id) { return $(id).value.split('\n').map(function (x) { return x.replace(/\s+/g, ' ').trim(); }).filter(Boolean).filter(function (x, k, l) { return l.indexOf(x) === k; }); };
+  var groupes = [{ nom: 'Avec alcool', choix: lire('#r-b-alcool') }, { nom: 'Sans alcool', choix: lire('#r-b-sans') }].filter(function (g) { return g.choix.length; });
+  if (!groupes.length) pb.push('Boissons : ajoutez au moins une boisson, ou décochez la case.');
+  groupes.forEach(function (g) { if (g.choix.length > 30) pb.push('Boissons « ' + g.nom + ' » : 30 au maximum.'); g.choix.forEach(function (c) { if (c.length > 40) pb.push('Boisson trop longue : « ' + c + ' » (40 caractères maximum).'); }); });
+  return { max: parseInt($('#r-b-max').value, 10) || 2, groupes: groupes };
 }
 function chargerMembres() {
   rpc('liste_membres', { p_mariage: S.m.id }).then(function (l) {
