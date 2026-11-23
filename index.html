@@ -1048,13 +1048,10 @@ function carteImageHtml(m, inv, evs, photo, detailPers) {
       '<p class="ci-couple">' + esc(m.marie_1) + ' <span class="ci-coeur" aria-hidden="true">💕</span><span class="sr"> ' + esc(t('et')) + ' </span> ' + esc(m.marie_2) + '</p>' +
       '<p class="ci-quand">' + esc(quand) + '</p><p class="ci-cordial">' + esc(t('ci_cordial')) + '</p>' +
     '</div>' +
-    '<div class="ci-carte">' +
-      '<p class="fp-pour">' + esc(t('a_lattention')) + '</p><p class="ci-invite-nom" id="nom-invite">' + esc(inv.nom) + '</p><hr>' +
-      /* Heure, lieu et adresse retirés (demande de Jad, 23/11) : ils figurent déjà dans le Programme juste en dessous.
-         La date ne revient ici que si le mariage n'en a pas encore. */
-      (m.date ? '' : '<div class="ci-infos">' + info('calendrier', t('fp_date'), t('date_a_definir')) + '</div>') +
-      (soiree ? '<p class="ci-suite">' + esc(t('fp_reception')) + '</p>' : '') +
-    '</div>' +
+    /* Carte « À l'attention de / nom / Suivi d'une réception » supprimée (demande de Jad, 23/11).
+       Le nom reste lu par les lecteurs d'écran ; la date « à confirmer » s'affiche seulement si le mariage n'a pas de date. */
+    '<p class="sr">' + esc(t('a_lattention')) + ' <span id="nom-invite">' + esc(inv.nom) + '</span></p>' +
+    (m.date ? '' : '<div class="ci-carte"><div class="ci-infos">' + info('calendrier', t('fp_date'), t('date_a_definir')) + '</div></div>') +
   '</section>';
 }
 
