@@ -313,6 +313,20 @@ details.pratique .corps { display: grid; gap: .6rem; padding-top: .5rem; }
 .ci-noms > span { display: block; white-space: nowrap; overflow: hidden; font-size: 13.5cqw; padding: 0 1cqw; }
 .ci-noms .et { font-size: .78em; margin: 0 .1em; color: var(--or); }
 .ci-entete .date-bloc { max-width: 84cqw; }
+.ci-intitule > span { display: block; white-space: nowrap; overflow: hidden; }
+.ci-noms-2 > span { font-size: 12cqw; line-height: 1.12; }
+.ci-noms-2 > span + span { margin-top: -.5cqw; }
+/* Bloc « Bienvenue » (d'après l'invitation de John & Chrines) */
+.ci-bienvenue { text-align: center; padding: 1.8rem 1.4rem 2rem; background: var(--fond); }
+.ci-surtitre { margin: 0 0 .7rem; font-size: .82rem; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--encre2); }
+.ci-salut { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: 2.6rem; line-height: 1.1; color: var(--encre); }
+.ci-bienvenue hr { border: 0; border-top: 1px solid var(--dore); width: 70%; margin: 1.3rem auto 1.4rem; opacity: .8; }
+.ci-intro { margin: 0 auto 1.2rem; max-width: 26rem; font-size: 1.02rem; line-height: 1.75; color: var(--encre); }
+.ci-intro strong { font-weight: 700; letter-spacing: .02em; }
+.ci-couple { margin: 0 auto 1.2rem; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: 2.15rem; line-height: 1.2; color: var(--encre); }
+.ci-coeur { font-size: .8em; margin: 0 .15em; }
+.ci-quand { margin: 0 auto 1.1rem; max-width: 24rem; font-size: 1.02rem; line-height: 1.6; color: var(--encre); }
+.ci-cordial { margin: 0; font-style: italic; font-size: 1.02rem; color: var(--encre2); }
 .ci-carte { position: relative; margin: 0; padding: 1.6rem 1.4rem 1.8rem; text-align: center; background: var(--surface); border-radius: 0 0 10px 10px; box-shadow: var(--ombre); }
 .ci-carte::before { content: ""; position: absolute; inset: 10px; border: 1.5px solid var(--dore); border-radius: 4px; pointer-events: none; }
 .ci-invite-nom { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; font-size: 1.9rem; line-height: 1.15; color: var(--encre); margin: .2rem 0 .6rem; overflow-wrap: anywhere; }
@@ -531,6 +545,15 @@ var TEXTES = {
     fp_texte_carte: 'sollicitent l’honneur de votre présence pour l’échange de leurs vœux et le début de leur vie à deux.',
     ci_texte_familles: 'C’est avec joie et un immense plaisir que les familles {f} sollicitent l’honneur de votre présence au mariage de leurs enfants {m1} et {m2}.',
     ci_texte_couple: 'C’est avec joie et un immense plaisir que {m1} et {m2} sollicitent l’honneur de votre présence à leur mariage.',
+    ci_bienvenue: 'Bienvenue',
+    ci_salut: 'Cher invité(e)',
+    ci_intro_familles: 'C’est avec joie et un plaisir immense que les familles {f} sollicitent l’honneur de votre présence au mariage de leurs enfants :',
+    ci_intro_couple: 'C’est avec joie et un plaisir immense que nous sollicitons l’honneur de votre présence à notre mariage :',
+    ci_quand: 'Ce {d}, pour {n} de fête.',
+    ci_quand_sans_date: 'Pour {n} de fête.',
+    ci_moments: { un: 'un moment', plusieurs: '{n} moments' },
+    ci_nombres: ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six'],
+    ci_cordial: 'Cordialement bienvenue à tous ✨',
     image_invitation_de: 'Invitation de',
     image_presenter: 'Présentez ce code à l’accueil'
   },
@@ -997,16 +1020,30 @@ function carteImageHtml(m, inv, evs, photo, detailPers) {
            '<p class="date-mois" aria-hidden="true">' + esc(f({ month: 'long' })) + '</p>';
   } else bloc = '<p class="date-attente">' + esc(t('date_a_definir')) + '</p>';
   var info = function (ic, lib, val) { return '<span class="ci-info"><span class="ci-ic">' + icone(ic) + '</span><span class="ci-lib">' + esc(lib) + '</span><span class="ci-val ci-ajuste">' + esc(val) + '</span></span>'; };
-  var texte = m.familles ? t('ci_texte_familles', { f: m.familles, m1: m.marie_1, m2: m.marie_2 }) : t('ci_texte_couple', { m1: m.marie_1, m2: m.marie_2 });
+  var longs = (m.marie_1 + m.marie_2).length > 16;   // noms complets : un nom par ligne
+  // Familles en gras : « KAMANDA et MAKANGILA » → <strong>KAMANDA</strong> et <strong>MAKANGILA</strong>
+  var familles = m.familles ? m.familles.split(/(\s+et\s+|\s*,\s*|\s*&\s*)/i).map(function (x, k) { return k % 2 ? esc(x) : '<strong>' + esc(x) + '</strong>'; }).join('') : '';
+  var intro = m.familles ? esc(t('ci_intro_familles', { f: '\u0001' })).replace('\u0001', familles) : esc(t('ci_intro_couple'));
+  var nb = evs.length || 1, nbTxt = (t('ci_nombres') || [])[nb] || String(nb);
+  var moments = nb === 1 ? t('ci_moments.un') : t('ci_moments.plusieurs', { n: nbTxt });
+  var quand = m.date ? t('ci_quand', { d: new Intl.DateTimeFormat(LANGUE === 'fr' ? 'fr-FR' : LANGUE, { timeZone: 'UTC', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(m.date + 'T12:00:00Z')), n: moments })
+                     : t('ci_quand_sans_date', { n: moments });
   return '<section class="carte-illustree" id="invitation" aria-labelledby="nom-invite">' +
     '<div class="ci-visuel"><img src="' + esc(photo) + '" width="1200" height="1648" alt="' + esc(m.marie_1 + ' et ' + m.marie_2) + '" decoding="async" fetchpriority="high" onerror="window.__carteIndisponible && window.__carteIndisponible()">' +
       '<div class="ci-fondu" aria-hidden="true"></div>' +
-      '<div class="ci-entete"><p class="ci-intitule">' + esc(m.intitule || t('intitule_defaut')) + '</p>' +
-        '<h1 class="ci-noms"><span class="ci-ajuste">' + esc(m.marie_1) + ' <span class="et">' + esc(t('et')) + '</span> ' + esc(m.marie_2) + '</span></h1>' + bloc + '</div>' +
+      '<div class="ci-entete"><p class="ci-intitule"><span class="ci-ajuste">' + esc(m.intitule || t('intitule_defaut')) + '</span></p>' +
+        '<h1 class="ci-noms' + (longs ? ' ci-noms-2' : '') + '">' + (longs
+          ? '<span class="ci-ajuste">' + esc(m.marie_1) + '</span><span class="ci-ajuste"><span class="et">' + esc(t('et')) + '</span> ' + esc(m.marie_2) + '</span>'
+          : '<span class="ci-ajuste">' + esc(m.marie_1) + ' <span class="et">' + esc(t('et')) + '</span> ' + esc(m.marie_2) + '</span>') + '</h1>' + bloc + '</div>' +
+    '</div>' +
+    '<div class="ci-bienvenue">' +
+      '<p class="ci-surtitre">' + esc(t('ci_bienvenue')) + '</p><h2 class="ci-salut">' + esc(t('ci_salut')) + '</h2><hr>' +
+      '<p class="ci-intro">' + intro + '</p>' +
+      '<p class="ci-couple">' + esc(m.marie_1) + ' <span class="ci-coeur" aria-hidden="true">💕</span><span class="sr"> ' + esc(t('et')) + ' </span> ' + esc(m.marie_2) + '</p>' +
+      '<p class="ci-quand">' + esc(quand) + '</p><p class="ci-cordial">' + esc(t('ci_cordial')) + '</p>' +
     '</div>' +
     '<div class="ci-carte">' +
       '<p class="fp-pour">' + esc(t('a_lattention')) + '</p><p class="ci-invite-nom" id="nom-invite">' + esc(inv.nom) + '</p><hr>' +
-      '<p class="ci-texte">' + esc(texte) + '</p>' +
       '<div class="ci-infos">' + (m.date ? '' : info('calendrier', t('fp_date'), t('date_a_definir'))) /* la date est déjà en grand au-dessus */ + info('horloge', t('fp_heure'), heure) + info('lieu', t('fp_lieu'), lieu) +
         (adresse ? '<span class="ci-info ci-info-libre"><span class="ci-val ci-ajuste">' + esc(adresse) + '</span></span>' : '') + '</div>' +
       (soiree ? '<p class="ci-suite">' + esc(t('fp_reception')) + '</p>' : '') +
