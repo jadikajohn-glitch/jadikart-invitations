@@ -999,7 +999,7 @@ function telechargerInvitation() {
     var m = D.mariage, inv = D.invite, th = (m.theme && m.theme.clair) || {};
     // Avec le fond « billet » : bleu clair, bleu roi et or (demande de Jad, 24/11) ; sinon les couleurs du thème
     var C = fond
-      ? { papier: '#F9F3E7', encre: '#12224D', encre2: '#45557A', principal: '#1E3A8A', accent: '#B8913E', accentT: '#8A6A22', gravure: '#1E3A8A' }
+      ? { papier: '#F9F3E7', encre: '#12224D', encre2: '#2C3B63', principal: '#1E3A8A', accent: '#B8913E', accentT: '#8A6A22', gravure: '#1E3A8A' }
       : { papier: '#FBFAF6', encre: couleur(th.encre) || '#14281F', encre2: couleur(th.encre2) || '#3C5246', principal: couleur(th.principal) || '#1F3A2E',
           accent: couleur(th.accent) || '#9A7A2E', accentT: couleur(th.accent_texte) || '#7A5F1F', gravure: couleur(th.principal) || '#1F3A2E' };
     var W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
@@ -1009,6 +1009,18 @@ function telechargerInvitation() {
       x.font = police; x.fillStyle = couleurT; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
       var taille = parseInt(police.match(/(\d+)px/)[1], 10);
       while (x.measureText(tx).width > (max || 820) && taille > 20) { taille -= 2; x.font = police.replace(/\d+px/, taille + 'px'); }
+      if (fond) {   // contour blanc sous le texte : bleu lisible sur le fond gravé (demande de Jad, 24/11)
+        x.save(); x.lineJoin = 'round'; x.miterLimit = 2; x.lineWidth = Math.max(5, taille * .16); x.strokeStyle = 'rgba(255,255,255,.95)';
+        // 1) ombre portée légère, bleue, décalée vers le bas-droite sous le contour
+        x.shadowColor = 'rgba(30,58,138,.38)'; x.shadowOffsetX = Math.max(1.5, taille * .03); x.shadowOffsetY = Math.max(2, taille * .045); x.shadowBlur = Math.max(3, taille * .09);
+        x.strokeText(tx, W / 2, y);
+        // 2) contour blanc net par-dessus (halo léger)
+        x.shadowColor = 'rgba(255,255,255,.9)'; x.shadowOffsetX = 0; x.shadowOffsetY = 0; x.shadowBlur = taille * .2; x.strokeText(tx, W / 2, y); x.restore();
+      }
+      if (couleurT === C.accentT) {   // dorure : or clair en haut, or foncé en bas (effet dorure à chaud)
+        var dor = x.createLinearGradient(0, y - taille * .8, 0, y + taille * .15);
+        dor.addColorStop(0, '#EBD28A'); dor.addColorStop(.45, '#B8913E'); dor.addColorStop(1, '#755516'); x.fillStyle = dor;
+      }
       x.fillText(tx, W / 2, y);
     }
     function lignes(tx, police, max) { x.font = police; var mots = String(tx).split(' '), l = [], cur = ''; mots.forEach(function (w) { var essai = cur ? cur + ' ' + w : w; if (x.measureText(essai).width > max && cur) { l.push(cur); cur = w; } else cur = essai; }); if (cur) l.push(cur); return l; }
@@ -1029,52 +1041,30 @@ function telechargerInvitation() {
       x.save(); arrondi(PX, PY, PW, PH, 40); x.fillStyle = 'rgba(250,246,238,.86)'; x.fill();
       x.lineWidth = 3; x.strokeStyle = C.accent; x.stroke(); arrondi(PX + 14, PY + 14, PW - 28, PH - 28, 30); x.lineWidth = 1.2; x.strokeStyle = C.principal; x.stroke(); x.restore();
     }
-    // 3. Effigie du couple gravée en lignes (technique des portraits de billets), dans un ovale estompé
-    if (gravure) {
-      // Effigie gravée à l'avance (style billet, encres terre cuite et bleu) : posée dans un ovale estompé
-      try {
-        var gw2 = 600, gh2 = 760, gcx = W / 2, gcy = 700;
-        var GW = gravure.naturalWidth, GH = gravure.naturalHeight, gsh = GH * .62, gsw = Math.min(GW, gsh * gw2 / gh2), gsx = Math.max(0, Math.min(GW - gsw, GW * .45 - gsw / 2));
-        var go = document.createElement('canvas'); go.width = gw2; go.height = gh2; var gx = go.getContext('2d');
-        gx.drawImage(gravure, gsx, 0, gsw, gsh, 0, 0, gw2, gh2);
-        gx.globalCompositeOperation = 'destination-in';
-        var gg = gx.createRadialGradient(gw2 / 2, gh2 / 2, gw2 * .22, gw2 / 2, gh2 / 2, gw2 * .5);
-        gg.addColorStop(0, 'rgba(0,0,0,1)'); gg.addColorStop(.75, 'rgba(0,0,0,.65)'); gg.addColorStop(1, 'rgba(0,0,0,0)');
-        gx.save(); gx.scale(1, gh2 / gw2); gx.fillStyle = gg; gx.fillRect(0, 0, gw2, gw2); gx.restore();
-        x.save(); x.globalAlpha = .4; x.drawImage(go, gcx - gw2 / 2, gcy - gh2 / 2); x.restore();
-        x.save(); x.strokeStyle = C.accent; x.globalAlpha = .3; x.lineWidth = 1.2;
-        [0, 12, 22].forEach(function (d) { x.beginPath(); x.ellipse(gcx, gcy, gw2 / 2 + d, gh2 / 2 + d, 0, 0, Math.PI * 2); x.stroke(); });
-        x.restore();
-      } catch (e) {}
-    } else if (effigie) {
-      try {
-        var ew = 600, eh = 760, ecx = W / 2, ecy = 700;
-        var IW = effigie.naturalWidth, IH = effigie.naturalHeight, sh = IH * .62, sw = Math.min(IW, sh * ew / eh), sx = Math.max(0, Math.min(IW - sw, IW * .45 - sw / 2));
-        var pas = 4, gw = Math.round(ew / 2), gh = Math.round(eh / pas);              // échantillonnage : une ligne de gravure tous les 4 px
-        var s = document.createElement('canvas'); s.width = gw; s.height = gh; var sx2 = s.getContext('2d');
-        sx2.drawImage(effigie, sx, 0, sw, sh, 0, 0, gw, gh);
-        var px = sx2.getImageData(0, 0, gw, gh).data;
-        var o = document.createElement('canvas'); o.width = ew; o.height = eh; var ox = o.getContext('2d');
-        ox.strokeStyle = C.gravure; ox.lineCap = 'round';
-        for (var j = 0; j < gh; j++) {
-          for (var i = 0; i < gw - 1; i++) {
-            var k = (j * gw + i) * 4, lum = (px[k] * .3 + px[k + 1] * .59 + px[k + 2] * .11) / 255;
-            var sombre = Math.pow(1 - lum, 1.15); if (sombre < .06) continue;
-            var x0 = i * 2, y0 = j * pas + pas / 2 + Math.sin(x0 * .045 + j * .35) * 1.2;   // légère ondulation guillochée
-            ox.lineWidth = .25 + sombre * 3.1;
-            ox.beginPath(); ox.moveTo(x0, y0); ox.lineTo(x0 + 2.2, j * pas + pas / 2 + Math.sin((x0 + 2) * .045 + j * .35) * 1.2); ox.stroke();
-          }
-        }
-        ox.globalCompositeOperation = 'destination-in';
-        var g = ox.createRadialGradient(ew / 2, eh / 2, ew * .2, ew / 2, eh / 2, ew * .5);
-        g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(.72, 'rgba(0,0,0,.7)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-        ox.save(); ox.scale(1, eh / ew); ox.fillStyle = g; ox.fillRect(0, 0, ew, ew); ox.restore();
-        x.save(); x.globalAlpha = fond ? .30 : .24; x.drawImage(o, ecx - ew / 2, ecy - eh / 2); x.restore();
-        x.save(); x.strokeStyle = C.accent; x.globalAlpha = .3; x.lineWidth = 1.2;
-        [0, 12, 22].forEach(function (d) { x.beginPath(); x.ellipse(ecx, ecy, ew / 2 + d, eh / 2 + d, 0, 0, Math.PI * 2); x.stroke(); });
-        x.restore();
-      } catch (e) {}
+    // 3. Micro-texte sur le cadre du cartouche (comme la ligne de sécurité d'un billet)
+    var MICRO = (prenom(m.marie_1) + ' & ' + prenom(m.marie_2) + ' · ' + (m.date ? m.date.split('-').reverse().join('.') : '') + (m.ville ? ' · ' + m.ville : '') + ' · ').toUpperCase();
+    function micro(x0, y0, longueur, angle) {
+      x.save(); x.translate(x0, y0); x.rotate(angle || 0); x.beginPath(); x.rect(0, -12, longueur, 16); x.clip();
+      x.font = '700 10px ' + SANS; x.fillStyle = C.accentT; x.textAlign = 'left'; x.textBaseline = 'middle';
+      try { x.letterSpacing = '1.5px'; } catch (e) {}
+      var bout = MICRO, w = x.measureText(bout).width || 100, k = 0; while (k < longueur) { x.fillText(bout, k, 0); k += w; }
+      try { x.letterSpacing = '0px'; } catch (e) {} x.restore();
     }
+    var cadre = fond ? { x: PX + 7, y: PY + 7, w: PW - 14, h: PH - 14, r: 34 } : { x: 52, y: 52, w: W - 104, h: H - 104, r: 0 };
+    micro(cadre.x + cadre.r + 6, cadre.y, cadre.w - 2 * cadre.r - 12, 0);
+    micro(cadre.x + cadre.r + 6, cadre.y + cadre.h, cadre.w - 2 * cadre.r - 12, 0);
+    micro(cadre.x, cadre.y + cadre.h - cadre.r - 6, cadre.h - 2 * cadre.r - 12, -Math.PI / 2);
+    micro(cadre.x + cadre.w, cadre.y + cadre.r + 6, cadre.h - 2 * cadre.r - 12, Math.PI / 2);
+    // Numéro de série de l'invitation (comme sur un billet) : initiales des mariés + code de l'invité
+    var serie = 'N° ' + (prenom(m.marie_1).charAt(0) + prenom(m.marie_2).charAt(0)).toUpperCase() + '-' + (DEMO ? 'DEMO' : String(CODE || '').split('-').pop().toUpperCase());
+    function numero(nx, ny, aligne) {
+      x.save(); x.font = '700 28px "Courier New", Courier, monospace'; x.textAlign = aligne; x.textBaseline = 'alphabetic';
+      try { x.letterSpacing = '3px'; } catch (e) {}
+      x.lineJoin = 'round'; x.lineWidth = 5; x.strokeStyle = 'rgba(255,255,255,.95)'; x.strokeText(serie, nx, ny);
+      x.fillStyle = '#8A2C1C'; x.fillText(serie, nx, ny); x.restore();
+    }
+    var bord = fond ? { d: PX + PW - 44, h: PY + 66 } : { d: W - 100, h: 120 };
+    numero(bord.d, bord.h, 'right');   // le second numéro est posé en bas à gauche, après la rangée du bas
 
     // 4. Textes : l'invité d'abord
     try { x.letterSpacing = '10px'; } catch (e) {}
@@ -1093,19 +1083,38 @@ function telechargerInvitation() {
     if (salle) { texte((salle.titre || t('type.' + salle.type)) + (salle.debut ? ' à ' + fmtHeureCourte(salle.debut) : '') + (salle.lieu ? ' · ' + salle.lieu : ''), y + 60, 'italic 500 38px ' + SERIF, C.encre2, 800); y += 60; }
     texte(t('ci_cordial').replace(/\s*✨\s*$/, ''), y + 62, 'italic 500 42px ' + SERIF, C.encre); y += 62;
 
-    // 5. QR code sur carré blanc (lisible au scanner), légende et signature
-    var Q = fond ? 430 : 460, qx = (W - Q) / 2, qy = Math.max(y + (fond ? 95 : 60), fond ? PY + PH + 50 : 1040);
-    if (qy + Q + 200 > H - 80) qy = H - 80 - 200 - Q;
-    if (fond) { x.save(); arrondi(qx - 26, qy - 26, Q + 52, Q + 52, 22); x.fillStyle = '#FFFFFF'; x.fill(); x.lineWidth = 3; x.strokeStyle = C.accent; x.stroke(); x.restore(); }
-    else { x.fillStyle = '#FFFFFF'; x.fillRect(qx, qy, Q, Q); }
-    var mat = window.QR.matrice(inv.qr), n = mat.length, cell = Math.floor((Q - 40) / n), ox2 = qx + (Q - cell * n) / 2, oy2 = qy + (Q - cell * n) / 2;
+    // 5. Rangée du bas : médaillon de l'effigie (net, dans un ovale doré) et QR code sur carré blanc
+    var source = gravure || effigie, MW = 340, MH = 440, RH = MH, Q = source ? 380 : (fond ? 430 : 460);
+    var rangee = fond ? PY + PH + 45 : Math.max(y + 60, 1040);
+    if (rangee + RH + 30 + 150 > H - 70) rangee = H - 70 - 150 - 30 - RH;
+    var blocW = source ? MW + 60 + Q + 52 : Q + 52, gauche = (W - blocW) / 2;
+    var qx = source ? gauche + MW + 60 + 26 : (W - Q) / 2, qy = rangee + (RH - Q) / 2;
+    if (source) {
+      try {
+        var mcx = gauche + MW / 2, mcy = rangee + MH / 2;
+        var SW = source.naturalWidth, SH = source.naturalHeight, csh = SH * .58, csw = Math.min(SW, csh * MW / MH), csx = Math.max(0, Math.min(SW - csw, SW * .46 - csw / 2));
+        x.save(); x.beginPath(); x.ellipse(mcx, mcy, MW / 2, MH / 2, 0, 0, Math.PI * 2); x.fillStyle = '#FFFFFF'; x.fill(); x.clip();
+        if (!gravure) { try { x.filter = 'grayscale(1) contrast(1.2)'; } catch (e) {} }
+        x.drawImage(source, csx, SH * .02, csw, csh, gauche, rangee, MW, MH);
+        try { x.filter = 'none'; } catch (e) {}
+        if (!gravure) { x.globalCompositeOperation = 'color'; x.fillStyle = C.principal; x.fillRect(gauche, rangee, MW, MH); }
+        x.restore();
+        x.save(); x.lineWidth = 6; x.strokeStyle = C.accent; x.beginPath(); x.ellipse(mcx, mcy, MW / 2, MH / 2, 0, 0, Math.PI * 2); x.stroke();
+        x.lineWidth = 1.5; x.strokeStyle = C.principal; x.beginPath(); x.ellipse(mcx, mcy, MW / 2 - 10, MH / 2 - 10, 0, 0, Math.PI * 2); x.stroke();
+        x.lineWidth = 1.2; x.strokeStyle = C.accent; x.beginPath(); x.ellipse(mcx, mcy, MW / 2 + 9, MH / 2 + 9, 0, 0, Math.PI * 2); x.stroke(); x.restore();
+      } catch (e) {}
+    }
+    x.save(); arrondi(qx - 26, qy - 26, Q + 52, Q + 52, 22); x.fillStyle = '#FFFFFF'; x.fill(); x.lineWidth = 3; x.strokeStyle = C.accent; x.stroke(); x.restore();
+    var mat = window.QR.matrice(inv.qr), n = mat.length, cell = Math.floor((Q - 20) / n), ox2 = qx + (Q - cell * n) / 2, oy2 = qy + (Q - cell * n) / 2;
     x.fillStyle = fond ? '#12224D' : couleurQR();
     for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (mat[r][c]) x.fillRect(ox2 + c * cell, oy2 + r * cell, cell, cell);
+    var basY = rangee + RH + 30;
     var dCourte = m.date ? new Intl.DateTimeFormat(LANGUE === 'fr' ? 'fr-FR' : LANGUE, { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(m.date + 'T12:00:00Z')) : '';
     var bas1 = t('image_presenter_salle'), bas2 = prenom(m.marie_1) + ' & ' + prenom(m.marie_2) + (dCourte ? ' · ' + dCourte : '') + (m.ville ? ' · ' + m.ville : '');
-    if (fond) { x.save(); arrondi(150, qy + Q + 44, W - 300, 150, 28); x.fillStyle = 'rgba(250,246,238,.9)'; x.fill(); x.lineWidth = 1.5; x.strokeStyle = C.accent; x.stroke(); x.restore(); }
-    texte(bas1, qy + Q + 100, '600 32px ' + SANS, C.encre2, 740);
-    texte(bas2, qy + Q + 160, '600 42px ' + SERIF, C.encre, 740);
+    if (fond) { x.save(); arrondi(150, basY, W - 300, 150, 28); x.fillStyle = 'rgba(250,246,238,.9)'; x.fill(); x.lineWidth = 1.5; x.strokeStyle = C.accent; x.stroke(); x.restore(); }
+    texte(bas1, basY + 56, '600 32px ' + SANS, C.encre2, 740);
+    texte(bas2, basY + 116, '600 42px ' + SERIF, C.encre, 740);
+    numero(fond ? 92 : 100, Math.min(H - 48, basY + 196), 'left');
 
     if (DEMO) { x.save(); x.translate(W / 2, H / 2); x.rotate(-0.45); x.font = '700 120px ' + SANS; x.fillStyle = 'rgba(154,122,46,.22)'; x.textAlign = 'center'; x.fillText(t('demo_filigrane'), 0, 0); x.restore(); }
     cv.toBlob(function (blob) {
