@@ -319,7 +319,61 @@ details.pratique .corps { display: grid; gap: .6rem; padding-top: .5rem; }
 /* Bloc « Bienvenue » (d'après l'invitation de John & Chrines) */
 .ci-bienvenue { text-align: center; padding: 1.8rem 1.4rem 2rem; background: var(--fond); }
 .ci-surtitre { margin: 0 0 .7rem; font-size: .82rem; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--encre2); }
-.ci-salut { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: 2.6rem; line-height: 1.1; color: var(--encre); }
+.ci-salut { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; font-size: 2.5rem; line-height: 1.1; color: var(--encre); overflow-wrap: anywhere; }
+.ci-place { margin: .55rem 0 0; font-weight: 700; font-size: 1.02rem; letter-spacing: .02em; color: var(--or-texte); }
+.ci-place small { font-weight: 600; }
+.pass-bloc { margin-top: 1.6rem; text-align: center; }
+.pass-bloc .qr { display: inline-block; padding: .9rem; background: var(--qr-fond); border-radius: 16px; border: 1px solid var(--ligne); line-height: 0; }
+.pass-bloc .qr svg { width: min(14rem, 62vw); height: auto; }
+.pass-bloc .note { font-size: .86rem; color: var(--encre-2); margin: .7rem auto 0; max-width: 22rem; }
+.pass-bloc .actions-pass { margin-top: 1rem; display: flex; justify-content: center; }
+/* Ornement ─ ♥ ─ et sections sans encadré */
+.orn-coeur { display: flex; align-items: center; justify-content: center; gap: .7rem; color: var(--or); margin: 0 auto .7rem; }
+.orn-coeur span { width: 4.6rem; height: 1px; background: var(--or); opacity: .8; }
+.orn-coeur svg { width: .95rem; height: .95rem; }
+.section-plate { margin-top: 1.4rem; padding: 1.6rem .3rem .4rem; border-top: 1px solid var(--ligne); }
+.section-plate > h2 { text-align: center; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; font-size: 1.9rem; line-height: 1.15; margin: 0; color: var(--encre); }
+.section-plate > .intro { text-align: center; margin: .4rem auto 1.3rem; color: var(--encre-2); font-size: .95rem; max-width: 24rem; }
+.sous-bloc { margin-top: 1.6rem; }
+.sous-bloc > h3 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; font-size: 1.5rem; line-height: 1.2; margin: 0 0 .3rem; color: var(--encre); }
+.sous-bloc > .intro { margin: 0 0 .9rem; color: var(--encre-2); font-size: .95rem; }
+.tout-oui { margin: .3rem 0 .9rem; }
+.tout-oui svg { width: 1.15rem; height: 1.15rem; }
+/* Frise du programme */
+.frise { list-style: none; margin: 0; padding: 0 0 0 1.4rem; position: relative; }
+.frise::before { content: ""; position: absolute; left: .32rem; top: .9rem; bottom: .6rem; width: 2px; background: var(--or); opacity: .75; }
+.fr-ev { position: relative; padding: 0 0 1.7rem .3rem; }
+.fr-ev:last-child { padding-bottom: .4rem; }
+.fr-ev::before { content: ""; position: absolute; left: -1.38rem; top: .95rem; width: .8rem; height: .8rem; border-radius: 50%; background: var(--or); box-shadow: 0 0 0 3px var(--fond); }
+.fr-tete { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.fr-heure { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 2.3rem; line-height: 1.1; color: var(--encre); }
+.fr-icone { color: var(--or); flex: none; }
+.fr-icone svg { width: 2.1rem; height: 2.1rem; }
+.fr-jour { margin: 0; font-weight: 600; color: var(--or-texte); font-size: .9rem; }
+.fr-ev h3 { margin: .15rem 0 .2rem; font-size: 1.05rem; font-weight: 700; color: var(--encre); }
+.fr-lieu { margin: 0; color: var(--encre-2); font-size: .97rem; overflow-wrap: anywhere; }
+.fr-lieu .adr { display: block; font-size: .9rem; opacity: .9; }
+.fr-tenue { display: flex; gap: .45rem; align-items: flex-start; margin: .45rem 0 0; font-size: .93rem; }
+.fr-tenue svg { width: 1.05rem; height: 1.05rem; flex: none; margin-top: .2rem; color: var(--encre-2); }
+.fr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .75rem; }
+.fr-actions .lien-maps { margin-top: 0; }
+.fr-actions .btn { border-color: var(--or); min-height: 2.6rem; padding: .45rem .9rem; align-items: center; }
+.fr-actions .btn svg { width: 1.1rem; height: 1.1rem; flex: none; }
+/* Pied de page */
+.pied-mariage { text-align: center; margin-top: 1.6rem; padding-top: 1.8rem; border-top: 1px solid var(--ligne); color: var(--encre-2); }
+.pm-noms { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; font-size: 1.8rem; color: var(--encre); }
+.pm-noms .et { color: var(--or-texte); }
+.pm-date { margin: .5rem 0 0; font-size: .95rem; }
+.pm-question { margin: 1rem 0 .6rem; font-size: .95rem; }
+.pm-whatsapp { border-color: var(--or); }
+.pm-familles { margin: 1rem 0 0; font-size: .92rem; }
+.pied-mariage .credit { margin-top: .6rem; }
+/* « Aa » : options d'affichage repliées */
+.reglages-menu { margin: 1.4rem auto 0; text-align: center; }
+.reglages-menu > summary { list-style: none; display: inline-grid; place-items: center; width: 2.9rem; height: 2.9rem; border-radius: 50%; border: 1px solid var(--ligne); background: var(--surface); font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; font-size: 1.15rem; color: var(--encre); cursor: pointer; }
+.reglages-menu > summary::-webkit-details-marker { display: none; }
+.reglages-menu[open] > summary { border-color: var(--vert); background: var(--vert-clair); }
+.reglages-menu .reglages { margin-top: .8rem; }
 .ci-pastilles { margin: .9rem -.6rem 0; flex-wrap: nowrap; gap: .35rem; }
 @media (max-width: 330px) { .ci-pastilles { flex-wrap: wrap; } }
 .ci-pastilles .pastille { font-size: clamp(.66rem, 3vw, .9rem); padding: .32rem clamp(.45rem, 2vw, .8rem); white-space: nowrap; background: var(--surface); box-shadow: 0 2px 6px rgba(18, 34, 77, .06); }
@@ -441,7 +495,20 @@ var TEXTES = {
     table: 'Table {t}',
     table_a_venir: 'Table communiquée prochainement',
     programme: 'Programme',
-    programme_intro: 'Les moments auxquels vous êtes convié(e).',
+    programme_intro: 'Touchez « Itinéraire » pour trouver chaque lieu.',
+    programme_journee: 'Programme de la journée',
+    heure_a_confirmer: 'Heure à confirmer',
+    agenda: 'Mon agenda',
+    agenda_rappel: 'Rappel : {e} — {m}',
+    reponse_groupe_intro: 'Confirmez votre présence, laissez un mot aux mariés et choisissez vos boissons.',
+    presence_titre: 'Présence',
+    tout_oui: 'Je viens aux {n} moments',
+    tout_oui_fait: 'C’est noté pour les {n} moments. Vérifiez les prénoms puis touchez « {b} ».',
+    pass_court: 'Présentez ce code à l’accueil de la salle. Il reste disponible même sans connexion. Il est personnel : ne le partagez pas.',
+    pied_question: 'Une question sur l’invitation ?',
+    pied_contact: 'Contactez l’organisateur :',
+    pied_familles: 'Familles {f}',
+    affichage: 'Options d’affichage',
     tenue: 'Tenue',
     couleurs: 'Couleurs de la tenue',
     itineraire: 'Itinéraire',
@@ -612,6 +679,45 @@ function nuancier(c) {
   var l = (c || []).filter(function (x) { return /^#[0-9A-Fa-f]{6}$/.test(x); });
   return l.length ? '<span class="nuancier" role="img" aria-label="' + esc(t('couleurs')) + '">' + l.map(function (x) { return '<span style="background:' + x + '" title="' + x + '"></span>'; }).join('') + '</span>' : '';
 }
+/* QR d'entrée + téléchargement (placé juste après l'accueil) */
+function passHtml() {
+  return '<div class="pass-bloc"><div class="qr" id="qr"></div><p class="note">' + esc(t('pass_court')) + '</p>' +
+         '<div class="actions-pass"><button class="btn btn-plein" type="button" id="btn-telecharger">' + icone('telecharger') + esc(t('telecharger')) + '</button></div></div>';
+}
+function fmtHeureCourte(iso) { return fmtDateHeure(iso, { hour: '2-digit', minute: '2-digit' }).replace(':', 'h').replace(/\s/g, ''); }
+/* « Mon agenda » : fichier .ics (calendrier du téléphone) avec rappels la veille et 2 h avant */
+function icsDate(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
+function icsTexte(x) { return String(x || '').replace(/\\/g, '\\\\').replace(/[,;]/g, function (c) { return '\\' + c; }).replace(/\r?\n/g, '\\n'); }
+function lienAgenda(e, m) {
+  if (!e.debut) return null;
+  var debut = new Date(e.debut), fin = new Date(debut.getTime() + (e.type === 'soiree' ? 5 : 2) * 3600000);
+  var titre = (e.titre || t('type.' + e.type)) + ' — ' + m.marie_1 + ' & ' + m.marie_2;
+  var lieu = [e.lieu, e.adresse, m.ville].filter(Boolean).join(', ');
+  var lignes = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Jadik Art//Invitations//FR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+    'UID:' + e.id + '@invitations', 'DTSTAMP:' + icsDate(new Date()), 'DTSTART:' + icsDate(debut), 'DTEND:' + icsDate(fin),
+    'SUMMARY:' + icsTexte(titre), 'LOCATION:' + icsTexte(lieu), 'DESCRIPTION:' + icsTexte(location.href),
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsTexte(t('agenda_rappel', { e: e.titre || t('type.' + e.type), m: m.marie_1 + ' & ' + m.marie_2 })), 'TRIGGER:-P1D', 'END:VALARM',
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsTexte(t('agenda_rappel', { e: e.titre || t('type.' + e.type), m: m.marie_1 + ' & ' + m.marie_2 })), 'TRIGGER:-PT2H', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'];
+  return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(lignes.join('\r\n'));
+}
+function nomFichierAgenda(e, m) { return ((e.titre || e.type) + '-' + m.marie_1.split(' ')[0] + '-' + m.marie_2.split(' ')[0]).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').toLowerCase() + '.ics'; }
+function prenom(x) { return String(x || '').trim().split(/\s+/)[0]; }
+function titreMot(x) { return String(x).toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, function (a, b, c) { return b + c.toUpperCase(); }); }
+function numeroLisible(n) { var d = String(n || '').replace(/[^0-9]/g, ''); return d.length === 12 && d.indexOf('243') === 0 ? '+243 ' + d.slice(3, 6) + ' ' + d.slice(6, 9) + ' ' + d.slice(9) : (n || ''); }
+/* Pied de page : noms, date, ville, contact de l'organisateur, familles, crédit photo */
+function piedHtml(m, inv, photo) {
+  var familles = m.familles ? m.familles.split(/\s+et\s+|\s*,\s*|\s*&\s*/i).map(titreMot).join(' & ') : '';
+  var date = fmtDateSeule(m.date);
+  return '<footer class="pied-mariage">' +
+    '<p class="pm-noms">' + esc(prenom(m.marie_1)) + ' <span class="et">' + esc(t('et')) + '</span> ' + esc(prenom(m.marie_2)) + '</p>' +
+    (date || m.ville ? '<p class="pm-date">' + esc(date ? date.charAt(0).toUpperCase() + date.slice(1) : '') + (m.ville ? '<br>' + esc(m.ville) : '') + '</p>' : '') +
+    (m.whatsapp_organisateur ? '<p class="pm-question">' + esc(t('pied_question')) + '<br>' + esc(t('pied_contact')) + '</p>' +
+      '<a class="btn pm-whatsapp" href="' + esc(lienWhatsApp(m.whatsapp_organisateur, 'Bonjour, je vous écris au sujet de l’invitation de ' + inv.nom + '.')) + '" target="_blank" rel="noopener">' + icone('whatsapp') + 'WhatsApp · ' + esc(numeroLisible(m.whatsapp_organisateur)) + '</a>' : '') +
+    (familles ? '<p class="pm-familles">' + esc(t('pied_familles', { f: familles })) + '</p>' : '') +
+    (photo && m.credit_photo ? '<p class="credit">' + esc(t('credit_photo', { c: m.credit_photo })) + '</p>' : '') +
+  '</footer>';
+}
 function initiale(nom) { var m = String(nom || '').trim().match(/[A-Za-zÀ-ÿ]/); return m ? m[0].toUpperCase() : '·'; }
 function lienWhatsApp(num, texte) { var n = String(num || '').replace(/[^0-9]/g, ''); return n ? 'https://wa.me/' + n + (texte ? '?text=' + encodeURIComponent(texte) : '') : null; }
 
@@ -636,6 +742,7 @@ var ICONES = {
   coeur: '<path d="M12 20s-7.5-4.5-7.5-10.2A4.1 4.1 0 0 1 12 7.4a4.1 4.1 0 0 1 7.5 2.4C19.5 15.5 12 20 12 20z"/>'
 };
 function icone(nom) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONES[nom] || ICONES.autre) + '</svg>'; }
+var ORNEMENT_COEUR = '<div class="orn-coeur" aria-hidden="true"><span></span><svg viewBox="0 0 24 22"><path fill="currentColor" d="M12 21.4l-1.5-1.3C5.4 15.5 2 12.4 2 8.6 2 5.5 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.5 22 8.6c0 3.8-3.4 6.9-8.5 11.5L12 21.4z"/></svg><span></span></div>';
 var ORNEMENT = '<svg class="ornement" viewBox="0 0 176 14" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M0 7h66M110 7h66"/><path d="M88 1l6 6-6 6-6-6z"/><path d="M74 7l4-4 4 4-4 4zM94 7l4-4 4 4-4 4z" opacity=".7"/><circle cx="68" cy="7" r="1.3" fill="currentColor"/><circle cx="108" cy="7" r="1.3" fill="currentColor"/></svg>';
 
 /* =====================================================================
@@ -767,37 +874,36 @@ function rendreInvitation() {
            '<span class="pastille">' + icone('table') + esc(inv.table ? t('table', { t: inv.table }) : t('table_a_venir')) + '</span>' +
          '</div>' +
        '</section>';
-  // Programme
-  h += '<section class="carte" aria-labelledby="titre-prog"><h2 id="titre-prog">' + esc(t('programme')) + '</h2><p class="intro">' + esc(t('programme_intro')) + '</p><ol class="programme">';
+  // Pass d'entrée : remonté juste après l'accueil (dans le bloc Bienvenue pour la carte illustrée)
+  if (!carteImage) h += '<section class="carte pass" aria-labelledby="titre-pass"><h2 id="titre-pass">' + esc(t('pass_titre')) + '</h2>' + passHtml() + '</section>';
+  // Programme de la journée : frise (heure en grand, date non répétée)
+  h += '<section class="section-plate" aria-labelledby="titre-prog">' + ORNEMENT_COEUR + '<h2 id="titre-prog">' + esc(t('programme_journee')) + '</h2><p class="intro">' + esc(t('programme_intro')) + '</p><ol class="frise">';
   evs.forEach(function (e) {
     var maps = e.maps_url || (e.adresse || e.lieu ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([e.lieu, e.adresse, m.ville].filter(Boolean).join(', ')) : null);
-    h += '<li class="ev">' +
-           '<div class="ev-icone">' + icone(e.type) + '</div>' +
-           '<div><h3>' + esc(e.titre || t('type.' + e.type)) + '</h3>' +
-             '<p class="quand">' + esc(fmtQuand(e.debut)) + '</p>' +
-             '<dl>' +
-               '<div><dt>' + icone('lieu') + '<span class="sr">Lieu</span></dt><dd>' + esc(e.lieu || t('lieu_a_definir')) + (e.adresse ? '<span class="adr">' + esc(e.adresse) + '</span>' : '') + '</dd></div>' +
-               (e.tenue || nuancier(e.couleurs) ? '<div><dt>' + icone('tenue') + '<span class="sr">' + esc(t('tenue')) + '</span></dt><dd>' + (e.tenue ? esc(t('tenue')) + ' : ' + esc(e.tenue) : esc(t('tenue')) + ' :') + nuancier(e.couleurs) + '</dd></div>' : '') +
-             '</dl>' +
+    var jourDiff = e.debut && m.date && e.debut.slice(0, 10) !== m.date ? fmtDateSeule(e.debut.slice(0, 10)) : '';
+    var ics = lienAgenda(e, m);
+    h += '<li class="fr-ev">' +
+           '<div class="fr-tete"><p class="fr-heure">' + esc(e.debut ? fmtHeureCourte(e.debut) : t('heure_a_confirmer')) + '</p><span class="fr-icone">' + icone(e.type) + '</span></div>' +
+           (jourDiff ? '<p class="fr-jour">' + esc(jourDiff) + '</p>' : '') +
+           '<h3>' + esc(e.titre || t('type.' + e.type)) + '</h3>' +
+           '<p class="fr-lieu">' + esc(e.lieu || t('lieu_a_definir')) + (e.adresse ? '<span class="adr">' + esc(e.adresse) + '</span>' : '') + '</p>' +
+           (e.tenue || nuancier(e.couleurs) ? '<p class="fr-tenue">' + icone('tenue') + '<span>' + (e.tenue ? esc(t('tenue')) + ' : ' + esc(e.tenue) : esc(t('tenue')) + ' :') + nuancier(e.couleurs) + '</span></p>' : '') +
+           '<div class="fr-actions">' +
              (maps ? '<a class="btn btn-petit lien-maps" href="' + esc(maps) + '" target="_blank" rel="noopener">' + icone('carte') + esc(t('itineraire')) + '</a>' : '') +
+             (ics ? '<a class="btn btn-petit lien-agenda" href="' + ics + '" download="' + esc(nomFichierAgenda(e, m)) + '">' + icone('calendrier') + esc(t('agenda')) + '</a>' : '') +
            '</div>' +
          '</li>';
   });
   h += '</ol></section>';
-  // Réponse
-  h += '<section class="carte" id="zone-reponse" aria-labelledby="titre-rep"></section>';
-  // Préférences (boissons) et livre d'or
-  if (m.boissons && m.boissons.groupes) h += '<section class="carte boissons" id="zone-boissons" aria-labelledby="titre-boissons"></section>';
-  h += '<section class="carte" id="zone-livre" aria-labelledby="titre-livre"></section>';
-  // Pass d'entrée
-  h += '<section class="carte pass" aria-labelledby="titre-pass"><h2 id="titre-pass">' + esc(t('pass_titre')) + '</h2>' +
-         '<div class="qr" id="qr"></div><p class="note">' + esc(t('pass_note')) + '</p>' +
-         '<div class="actions-pass"><button class="btn" type="button" id="btn-telecharger">' + icone('telecharger') + esc(t('telecharger')) + '</button></div></section>';
-  // Contact + réglages
-  if (m.whatsapp_organisateur) {
-    h += '<div class="contact"><a class="btn" href="' + esc(lienWhatsApp(m.whatsapp_organisateur, 'Bonjour, je vous écris au sujet de l’invitation de ' + inv.nom + '.')) + '" target="_blank" rel="noopener">' + icone('whatsapp') + esc(t('contacter')) + '</a></div>';
-  }
-  if (photo && m.credit_photo) h += '<p class="credit">' + esc(t('credit_photo', { c: m.credit_photo })) + '</p>';
+  // Votre réponse : présence, préférences et livre d'or regroupés (comme John & Chrines)
+  h += '<section class="section-plate reponse-groupe" aria-labelledby="titre-groupe-rep">' + ORNEMENT_COEUR +
+         '<h2 id="titre-groupe-rep">' + esc(t('reponse_titre')) + '</h2><p class="intro">' + esc(t('reponse_groupe_intro')) + '</p>' +
+         '<div class="sous-bloc" id="zone-reponse" aria-labelledby="titre-rep"></div>' +
+         (m.boissons && m.boissons.groupes ? '<div class="sous-bloc boissons" id="zone-boissons" aria-labelledby="titre-boissons"></div>' : '') +
+         '<div class="sous-bloc" id="zone-livre" aria-labelledby="titre-livre"></div>' +
+       '</section>';
+  // Pied de page (comme John & Chrines) + options d'affichage réduites
+  h += piedHtml(m, inv, photo);
   h += reglagesHtml();
   APP.innerHTML = h;
   rendreQR();
@@ -805,6 +911,7 @@ function rendreInvitation() {
   rendreBoissons();
   rendreLivre();
   $('#btn-telecharger').addEventListener('click', telechargerInvitation);
+  var tout = $('#tout-oui'); if (tout) tout.addEventListener('click', toutOui);
   ajusterCarte();
   brancherReglages();
 }
@@ -813,7 +920,7 @@ function rendreInvitation() {
 function rendreBoissons() {
   var z = $('#zone-boissons'); if (!z) return;
   var b = D.mariage.boissons, mx = parseInt(b.max, 10) || 1, choisis = (D.invite.boissons || []).slice(), ouvert = D.mariage.reponses_ouvertes !== false;
-  var h = '<h2 id="titre-boissons">' + esc(t('preferences_titre')) + '</h2><p class="intro"><b>' + esc(t('boissons_question')) + '</b> ' + esc(t('boissons_max', { n: mx })) + '</p>';
+  var h = '<h3 id="titre-boissons">' + esc(t('preferences_titre')) + '</h3><p class="intro"><b>' + esc(t('boissons_question')) + '</b> ' + esc(t('boissons_max', { n: mx })) + '</p>';
   (b.groupes || []).forEach(function (g) {
     h += '<fieldset><legend>' + esc(g.nom) + '</legend><div class="choix-multi">' + (g.choix || []).map(function (c) {
       return '<label><input type="checkbox" value="' + esc(c) + '"' + (choisis.indexOf(c) >= 0 ? ' checked' : '') + (ouvert ? '' : ' disabled') + '><span>' + esc(c) + '</span></label>';
@@ -843,7 +950,7 @@ function rendreBoissons() {
 function rendreLivre(messageOk) {
   var z = $('#zone-livre'); if (!z) return;
   var l = D.invite.livre_or || [];
-  z.innerHTML = '<h2 id="titre-livre">' + esc(t('livre_titre')) + '</h2><p class="intro">' + esc(t('livre_intro')) + '</p>' +
+  z.innerHTML = '<h3 id="titre-livre">' + esc(t('livre_titre')) + '</h3><p class="intro">' + esc(t('livre_intro')) + '</p>' +
     '<div class="champ"><label class="sr" for="livre-texte">' + esc(t('livre_placeholder')) + '</label><textarea id="livre-texte" maxlength="1000" rows="3" placeholder="' + esc(t('livre_placeholder')) + '"></textarea></div>' +
     '<button class="btn btn-plein btn-large" type="button" id="btn-livre" style="margin-top:.8rem">' + esc(t('livre_envoyer')) + '</button>' +
     '<div class="alerte' + (messageOk ? ' succes' : '') + '" id="msg-livre" role="status"' + (messageOk ? '' : ' hidden') + '>' + esc(messageOk || '') + '</div>' +
@@ -1040,17 +1147,14 @@ function carteImageHtml(m, inv, evs, photo, detailPers) {
           : '<span class="ci-ajuste">' + esc(m.marie_1) + ' <span class="et">' + esc(t('et')) + '</span> ' + esc(m.marie_2) + '</span>') + '</h1>' + bloc + '</div>' +
     '</div>' +
     '<div class="ci-bienvenue">' +
-      '<p class="ci-surtitre">' + esc(t('ci_bienvenue')) + '</p><h2 class="ci-salut">' + esc(t('ci_salut')) + '</h2>' +
-      /* Personnes et table juste sous « Cher invité(e) » (maquette de Jad, 23/11) */
-      '<div class="pastilles ci-pastilles"><span class="pastille">' + icone('personnes') + esc(tPersonnes(inv.total)) + detailPers + '</span>' +
-      '<span class="pastille">' + icone('table') + esc(inv.table ? t('table', { t: inv.table }) : t('table_a_venir')) + '</span></div><hr>' +
+      /* Comme l'invitation de John & Chrines : le nom de l'invité en grand, puis table et personnes en doré (24/11) */
+      '<p class="ci-surtitre">' + esc(t('ci_bienvenue')) + '</p><h2 class="ci-salut" id="nom-invite">' + esc(inv.nom) + '</h2>' +
+      '<p class="ci-place">' + esc(inv.table ? t('table', { t: inv.table }) : t('table_a_venir')) + ' · ' + esc(tPersonnes(inv.total)) + detailPers + '</p><hr>' +
       '<p class="ci-intro">' + intro + '</p>' +
       '<p class="ci-couple">' + esc(m.marie_1) + ' <span class="ci-coeur" aria-hidden="true">💕</span><span class="sr"> ' + esc(t('et')) + ' </span> ' + esc(m.marie_2) + '</p>' +
       '<p class="ci-quand">' + esc(quand) + '</p><p class="ci-cordial">' + esc(t('ci_cordial')) + '</p>' +
+      passHtml() +
     '</div>' +
-    /* Carte « À l'attention de / nom / Suivi d'une réception » supprimée (demande de Jad, 23/11).
-       Le nom reste lu par les lecteurs d'écran ; la date « à confirmer » s'affiche seulement si le mariage n'a pas de date. */
-    '<p class="sr">' + esc(t('a_lattention')) + ' <span id="nom-invite">' + esc(inv.nom) + '</span></p>' +
     (m.date ? '' : '<div class="ci-carte"><div class="ci-infos">' + info('calendrier', t('fp_date'), t('date_a_definir')) + '</div></div>') +
   '</section>';
 }
@@ -1102,7 +1206,7 @@ function rendreZoneReponse() {
   var z = $('#zone-reponse'), m = D.mariage;
   var ouvertes = m.reponses_ouvertes !== false;
   var limite = m.reponses_jusqu_au ? fmtLimite(m.reponses_jusqu_au) : null;
-  var h = '<h2 id="titre-rep">' + esc(t('reponse_titre')) + '</h2>';
+  var h = '<h3 id="titre-rep">' + esc(t('presence_titre')) + '</h3>';
 
   if (!ouvertes) {
     h += '<p class="intro">' + esc(limite ? t('reponses_closes', { d: limite }) : t('reponses_closes_sans')) + '</p>';
@@ -1122,6 +1226,11 @@ function rendreZoneReponse() {
   }
 
   h += (limite ? '<p class="echeance">' + icone('horloge') + esc(t('repondre_avant', { d: limite })) + '</p>' : '');
+  if (D.evenements.length > 1) {
+    var nbM = (t('ci_nombres') || [])[D.evenements.length] || String(D.evenements.length);
+    h += '<button class="btn btn-plein btn-large tout-oui" type="button" id="tout-oui">' + icone('coeur') + esc(t('tout_oui', { n: nbM })) + '</button>';
+    h += '<div class="alerte succes" id="msg-tout-oui" role="status" hidden></div>';
+  }
   h += '<p class="intro">' + esc(t('reponse_intro')) + '</p>';
   h += '<form id="form-reponse" novalidate>';
   D.evenements.forEach(function (e, idx) { h += blocEvenementHtml(e, idx); });
@@ -1132,6 +1241,16 @@ function rendreZoneReponse() {
   h += '</form>';
   z.innerHTML = h;
   brancherFormulaire();
+  var tout = $('#tout-oui'); if (tout) tout.addEventListener('click', toutOui);
+}
+
+/* « Je viens aux trois moments » : coche « présent » partout, pour toutes les personnes invitées */
+function toutOui() {
+  D.evenements.forEach(function (e) { var c = CHOIX[e.id]; c.present = true; if (!c.nb || c.nb < 1) c.nb = D.invite.total; });
+  sauverBrouillon(); rendreZoneReponse();
+  var nbM = (t('ci_nombres') || [])[D.evenements.length] || String(D.evenements.length);
+  var msg = $('#msg-tout-oui'); if (msg) { msg.textContent = t('tout_oui_fait', { n: nbM, b: t('envoyer') }); msg.hidden = false; }
+  var b = $('#btn-envoyer'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function blocEvenementHtml(e, idx) {
@@ -1297,12 +1416,12 @@ function prefs() { return stock.lire('preferences') || {}; }
 function themeEffectif() { var p = prefs(); return p.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
 function reglagesHtml() {
   var p = prefs(), sombre = themeEffectif() === 'dark';
-  return '<div class="reglages" role="group" aria-label="Affichage">' +
+  return '<details class="reglages-menu"><summary aria-label="' + esc(t('affichage')) + '" title="' + esc(t('affichage')) + '"><span aria-hidden="true">Aa</span></summary><div class="reglages" role="group" aria-label="' + esc(t('affichage')) + '">' +
            '<button type="button" data-r="grand" aria-pressed="' + !!p.grand + '">A+ ' + esc(t('grands_caracteres')) + '</button>' +
            '<button type="button" data-r="contraste" aria-pressed="' + !!p.contraste + '">' + esc(t('contraste')) + '</button>' +
            '<button type="button" data-r="theme" aria-pressed="false">' + esc(sombre ? t('theme_clair') : t('theme_sombre')) + '</button>' +
            (D && D.etat === 'ok' ? '<button type="button" data-r="animations" aria-pressed="' + (p.animations !== false) + '">♥ ' + esc(t('animations')) + '</button>' : '') +
-         '</div>' +
+         '</div></details>' +
          '<p class="pied">' + esc(t('signature', { s: CFG.SIGNATURE })) + '</p>';
 }
 function brancherReglages() {
