@@ -485,7 +485,7 @@ function vueApercu() {
   var reels = S.invites.filter(reel), annules = S.invites.filter(function (i) { return i.statut === 'annulee'; });
   var somme = function (l, f) { return l.reduce(function (s, i) { return s + f(i); }, 0); };
   var nbStat = function (st) { return reels.filter(function (i) { return i.statut === st; }).length; };
-  var sansTable = reels.filter(function (i) { return !i.table_id; }), sansTel = reels.filter(function (i) { return !i.telephone && !(i.via_relais && S.m.whatsapp_relais); });
+  var sansTable = reels.filter(function (i) { return !i.table_id; }), sansTel = reels.filter(function (i) { return !i.telephone && !(i.via_relais && relaisDe(i)); });
   var regimes = reels.filter(function (i) { return i.regimes || S.ev.some(function (e) { var r = S.rep[i.id] && S.rep[i.id][e.id]; return r && r.regimes; }); });
   var places = somme(S.tables, function (t) { return t.capacite; });
 
@@ -558,7 +558,7 @@ function alertes() {
   if (st.length) l.push({ niv: '', html: '<b>' + pluriel(st.length, 'invitation sans table', 'invitations sans table') + '</b> : ' + st.slice(0, 8).map(lienVoir).join(', ') + (st.length > 8 ? '…' : '') });
   var stel = reels.filter(function (i) { return !i.telephone && !i.via_relais; });
   if (stel.length) l.push({ niv: '', html: '<b>' + pluriel(stel.length, 'invité sans téléphone', 'invités sans téléphone') + '</b> (ni relais coché) : ' + stel.slice(0, 8).map(lienVoir).join(', ') + (stel.length > 8 ? '…' : '') });
-  if (reels.some(function (i) { return i.via_relais || !i.telephone; }) && !S.m.whatsapp_relais) l.push({ niv: 'grave', html: 'Des invités passent par le <b>relais</b>, mais aucun numéro relais n\'est enregistré (Réglages).' });
+  if (reels.some(function (i) { return (i.via_relais || !i.telephone) && !relaisDe(i); })) l.push({ niv: 'grave', html: 'Des invités passent par le <b>relais</b>, mais aucun numéro relais n\'est enregistré (Réglages).' });
   var part = [];
   reels.forEach(function (i) { S.ev.forEach(function (e) { var r = S.rep[i.id] && S.rep[i.id][e.id]; if (r && r.present && r.nb_personnes < pers(i)) part.push({ i: i, e: e, r: r }); }); });
   if (part.length) l.push({ niv: '', html: '<b>Présences partielles</b> : ' + part.slice(0, 10).map(function (p) { return lienVoir(p.i) + ' (' + esc(p.e.titre) + ' : ' + p.r.nb_personnes + ' sur ' + pers(p.i) + ')'; }).join(', ') + (part.length > 10 ? '…' : '') });
@@ -636,9 +636,12 @@ function texteInvitation(i) {
   return 'Bonjour ' + i.nom + ',\n\n' + S.m.marie_1 + ' & ' + S.m.marie_2 + ' ont la joie de vous inviter à leur mariage' + d + (S.m.ville ? ' à ' + S.m.ville : '') + '.\n\n' +
          'Votre invitation personnelle (' + pluriel(pers(i), 'personne', 'personnes') + ') :\n' + lienInvite(i) + '\n\nMerci de nous répondre directement sur la page. Elle contient aussi votre QR code d\'entrée.';
 }
+/* Un relais par famille : famille_2 → relais 2 (s'il existe), sinon relais 1 ; si un seul relais est rempli, il sert à tous */
+function relaisDe(i) { var r1 = S.m.whatsapp_relais, r2 = S.m.whatsapp_relais_2; return i && i.groupe === 'famille_2' ? (r2 || r1) : (r1 || r2); }
+function nomRelais(num) { return num && num === S.m.whatsapp_relais_2 && num !== S.m.whatsapp_relais ? 'relais famille ' + S.m.marie_2.split(' ')[0] : 'relais famille ' + S.m.marie_1.split(' ')[0]; }
 function envoyerWa(i) {
   var relais = i.via_relais || !i.telephone;
-  var num = relais ? S.m.whatsapp_relais : i.telephone;
+  var num = relais ? relaisDe(i) : i.telephone;
   if (!num) { toast(relais ? 'Aucun numéro relais enregistré (onglet Réglages).' : 'Pas de numéro pour cet invité.', { erreur: true }); return; }
   var txt = relais ? 'Bonjour, voici l\'invitation de ' + i.nom + ', à lui transmettre s\'il vous plaît :\n\n' + texteInvitation(i) : texteInvitation(i);
   window.open(lienWa(num, txt), '_blank', 'noopener');    // ouvert d'abord (sinon bloqué par le navigateur)
@@ -886,12 +889,20 @@ function deplacer(inviteId, tableId) {
   });
 }
 function envoyerRelaisTable(t) {
-  if (!S.m.whatsapp_relais) { toast('Aucun numéro relais enregistré (onglet Réglages).', { erreur: true }); return; }
+  if (!S.m.whatsapp_relais && !S.m.whatsapp_relais_2) { toast('Aucun numéro relais enregistré (onglet Réglages).', { erreur: true }); return; }
   var l = occupation(t).invites.filter(function (i) { return (i.via_relais || !i.telephone) && !i.demo; });
+  // un message par relais (famille 1 / famille 2), chacun avec ses invités
+  var parRelais = {}; l.forEach(function (i) { var n = relaisDe(i); (parRelais[n] = parRelais[n] || []).push(i); });
+  var cles = Object.keys(parRelais);
+  // le navigateur n'ouvre qu'un WhatsApp à la fois : on envoie d'abord le relais qui a encore des invitations non envoyées
+  var num = cles.filter(function (n) { return parRelais[n].some(function (i) { return i.statut === 'a_envoyer'; }); })[0] || cles[0];
+  var lot = parRelais[num];
   var txt = 'Bonjour, voici les invitations au mariage de ' + S.m.marie_1 + ' & ' + S.m.marie_2 + ' pour ' + nomTable(t) + ', à transmettre s\'il vous plaît :\n\n' +
-            l.map(function (i) { return '• ' + i.nom + ' (' + pluriel(pers(i), 'personne', 'personnes') + ') :\n' + lienInvite(i); }).join('\n\n');
-  window.open(lienWa(S.m.whatsapp_relais, txt), '_blank', 'noopener');
-  marquerEnvoyees(l);
+            lot.map(function (i) { return '• ' + i.nom + ' (' + pluriel(pers(i), 'personne', 'personnes') + ') :\n' + lienInvite(i); }).join('\n\n');
+  window.open(lienWa(num, txt), '_blank', 'noopener');
+  marquerEnvoyees(lot);
+  var reste = cles.filter(function (n) { return n !== num && parRelais[n].some(function (i) { return i.statut === 'a_envoyer'; }); });
+  if (reste.length) toast('Il reste les invitations du ' + nomRelais(reste[0]) + ' : touchez de nouveau « Envoyer au relais ».');
 }
 function formTables() {
   var nums = S.tables.map(function (t) { return parseInt(t.nom, 10); }).filter(function (n) { return !isNaN(n); }), suivant = nums.length ? Math.max.apply(null, nums) + 1 : 1;
@@ -1004,7 +1015,8 @@ function vueReglages() {
     '<div class="deux"><div class="champ"><label for="r-date">Date du mariage <span class="aide">(facultatif)</span></label><input type="date" id="r-date" value="' + esc(m.date_mariage || '') + '"></div><div class="champ"><label for="r-ville">Ville</label><input type="text" id="r-ville" maxlength="60" value="' + esc(m.ville || '') + '"></div></div>' +
     '<div class="champ"><label for="r-limite">Date limite des réponses <span class="aide">(facultatif — au-delà, l\'invité ne peut plus répondre ni modifier)</span></label><input type="datetime-local" id="r-limite" value="' + esc(versChampLocal(m.reponses_jusqu_au)) + '"></div>' +
     '<div class="deux"><div class="champ"><label for="r-wa">WhatsApp de l\'organisateur <span class="aide">(bouton « Contacter » de l\'invitation, public)</span></label><input type="tel" id="r-wa" value="' + esc(m.whatsapp_organisateur || '') + '" placeholder="+243…"></div>' +
-    '<div class="champ"><label for="r-relais">Numéro relais <span class="aide">(reçoit les invitations des invités sans téléphone)</span></label><input type="tel" id="r-relais" value="' + esc(m.whatsapp_relais || '') + '" placeholder="+243…"></div></div>' +
+    '<div class="champ"><label for="r-relais">Relais famille de ' + esc(String(m.marie_1).split(' ')[0]) + ' <span class="aide">(reçoit les invitations des invités sans téléphone de cette famille, et des autres groupes)</span></label><input type="tel" id="r-relais" value="' + esc(m.whatsapp_relais || '') + '" placeholder="+243…"></div></div>' +
+    '<div class="deux"><div class="champ"><label for="r-relais2">Relais famille de ' + esc(String(m.marie_2).split(' ')[0]) + ' <span class="aide">(invités du groupe « Famille de ' + esc(String(m.marie_2).split(' ')[0]) + ' » sans téléphone)</span></label><input type="tel" id="r-relais2" value="' + esc(m.whatsapp_relais_2 || '') + '" placeholder="+243…"></div><div></div></div>' +
     '<div class="deux"><div class="champ"><label for="r-intitule">Intitulé <span class="aide">(ex. Mariage coutumier)</span></label><input type="text" id="r-intitule" maxlength="40" value="' + esc(m.intitule || '') + '" placeholder="Mariage"></div>' +
     '<div class="champ"><label for="r-familles">Familles <span class="aide">(ex. Mugayo et Ngoy)</span></label><input type="text" id="r-familles" maxlength="120" value="' + esc(m.familles || '') + '"></div></div>' +
     '<div class="champ"><label for="r-site">Adresse du site pour ce mariage <span class="aide">(facultatif, ex. https://emman-gloria.vercel.app — à ajouter d\'abord dans Vercel, onglet Domains)</span></label><input type="url" id="r-site" maxlength="100" value="' + esc(m.adresse_site || '') + '" placeholder="https://prenom1-prenom2.vercel.app"></div>' +
@@ -1027,7 +1039,8 @@ function vueReglages() {
   $('#r-b-defaut').addEventListener('click', function () { $('#r-b-alcool').value = BOISSONS_HABITUELLES.alcool.join('\n'); $('#r-b-sans').value = BOISSONS_HABITUELLES.sans.join('\n'); });
   $('#form-mariage').addEventListener('submit', function (ev) {
     ev.preventDefault(); if (ro) return;
-    var err = $('#r-err'), wa = normTel($('#r-wa').value), rel = normTel($('#r-relais').value), pb = [];
+    var err = $('#r-err'), wa = normTel($('#r-wa').value), rel = normTel($('#r-relais').value), rel2 = normTel($('#r-relais2').value), pb = [];
+    if (rel2 && !telValide(rel2)) pb.push('Numéro relais 2 invalide.');
     if (wa && !telValide(wa)) pb.push('WhatsApp de l\'organisateur invalide.'); if (rel && !telValide(rel)) pb.push('Numéro relais invalide.');
     if (!$('#r-m1').value.trim() || !$('#r-m2').value.trim()) pb.push('Les deux prénoms sont obligatoires.');
     var site = $('#r-site').value.trim().toLowerCase().replace(/\/+$/, '');
@@ -1037,7 +1050,7 @@ function vueReglages() {
     var boissons = lireBoissons(pb);
     if (pb.length) { err.innerHTML = pb.map(esc).join('<br>'); err.hidden = false; return; }
     modifier('mariages', { id: S.m.id }, { modele: $('#r-modele').value, boissons: boissons, marie_1: $('#r-m1').value.trim(), marie_2: $('#r-m2').value.trim(), date_mariage: $('#r-date').value || null, ville: $('#r-ville').value.trim() || null,
-      reponses_jusqu_au: depuisChampLocal($('#r-limite').value), whatsapp_organisateur: wa || null, whatsapp_relais: rel || null, adresse_site: site || null, photo_url: photo || null, intitule: $('#r-intitule').value.trim() || null, familles: $('#r-familles').value.trim() || null, credit_photo: $('#r-credit').value.trim() || null, langue: $('#r-langue').value, conservation_jours: parseInt($('#r-conserv').value, 10) || 90 })
+      reponses_jusqu_au: depuisChampLocal($('#r-limite').value), whatsapp_organisateur: wa || null, whatsapp_relais: rel || null, whatsapp_relais_2: rel2 || null, adresse_site: site || null, photo_url: photo || null, intitule: $('#r-intitule').value.trim() || null, familles: $('#r-familles').value.trim() || null, credit_photo: $('#r-credit').value.trim() || null, langue: $('#r-langue').value, conservation_jours: parseInt($('#r-conserv').value, 10) || 90 })
       .then(function (r) { if (!r || !r.length) throw new Error('Action non autorisée pour votre rôle.'); toast('Réglages enregistrés'); return recharger(); }).catch(function (e) { err.textContent = messageErreur(e); err.hidden = false; });
   });
   if (admin()) { chargerMembres(); $('#form-membre').addEventListener('submit', ajouterMembre); }
