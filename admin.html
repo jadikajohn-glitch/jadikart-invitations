@@ -287,7 +287,7 @@ function baseSite() {
   if (a && /^https:\/\/[a-z0-9.-]+$/.test(a)) return a + '/';
   return location.origin + location.pathname.replace(/admin\.html$/, '').replace(/\/?$/, '/');
 }
-function lienInvite(i) { return baseSite() + '?i=' + i.code; }
+function lienInvite(i) { return baseSite() + (S.m && S.m.liens_courts ? '' : '?i=') + i.code; }  // liens courts : https://site/code (vercel.json)
 function copier(texte) {
   if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(texte).then(function () { toast('Lien copié'); }, function () { copierSecours(texte); });
   copierSecours(texte);
@@ -643,7 +643,7 @@ function envoyerWa(i) {
   var relais = i.via_relais || !i.telephone;
   var num = relais ? relaisDe(i) : i.telephone;
   if (!num) { toast(relais ? 'Aucun numéro relais enregistré (onglet Réglages).' : 'Pas de numéro pour cet invité.', { erreur: true }); return; }
-  var txt = relais ? 'Bonjour, voici l\'invitation de ' + i.nom + ', à lui transmettre s\'il vous plaît :\n\n' + texteInvitation(i) : texteInvitation(i);
+  var txt = texteInvitation(i);   // même message direct, que l'envoi passe par le relais ou non
   window.open(lienWa(num, txt), '_blank', 'noopener');    // ouvert d'abord (sinon bloqué par le navigateur)
   marquerEnvoyees([i]);
 }
