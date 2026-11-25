@@ -637,7 +637,8 @@ var TEXTES = {
    ===================================================================== */
 var CFG = window.CONFIG;
 var params = new URLSearchParams(location.search);
-var CODE = (params.get('i') || '').trim().toLowerCase();
+// Code de l'invité : ?i=code (anciens liens) ou adresse courte https://site/code
+var CODE = (params.get('i') || (location.pathname.match(/^\/([A-Za-z0-9-]{3,60})\/?$/) || [])[1] || '').trim().toLowerCase();
 var MODE_DEMO = params.get('demo') === '1';
 var LANGUE = 'fr';
 
