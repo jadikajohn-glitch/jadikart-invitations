@@ -118,6 +118,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--vert); outline: 
 
 /* Listes d'invités */
 .filtres { display: grid; grid-template-columns: 1fr; gap: .5rem; margin-top: .9rem; }
+.cotes { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .4rem; margin-top: .9rem; }
+.cotes button { min-width: 0; min-height: 2.75rem; padding: .35rem .5rem; border-radius: 2rem; border: 1.5px solid var(--ligne); background: transparent; color: var(--encre); font: inherit; font-weight: 600; cursor: pointer; line-height: 1.15; }
+.cotes button small { display: block; font-weight: 500; font-size: .78rem; color: var(--encre-2); }
+.cotes button[aria-pressed="true"] { background: var(--vert); border-color: var(--vert); color: var(--sur-vert); }
+.cotes button[aria-pressed="true"] small { color: var(--sur-vert); opacity: .85; }
 @media (min-width: 640px) { .filtres { grid-template-columns: 2fr 1fr 1fr; } }
 .compte { font-size: .86rem; color: var(--encre-2); margin: .7rem 0 0; }
 .liste { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .5rem; }
@@ -399,7 +404,7 @@ function echec(e) { if (e && e.message === 'session') return afficherConnexion()
 /* =====================================================================
    3. ÉTAT
    ===================================================================== */
-var S = { mariages: [], m: null, role: null, ev: [], tables: [], invites: [], rep: {}, onglet: 'apercu', filtres: { q: '', statut: '', table: '' }, choisi: null, membres: null };
+var S = { mariages: [], m: null, role: null, ev: [], tables: [], invites: [], rep: {}, onglet: 'apercu', filtres: { q: '', statut: '', table: '', cote: stock.lire('admin-cote') || '1' }, choisi: null, membres: null };
 var GROUPES = { famille_1: null, famille_2: null, amis: 'Amis', collegues: 'Collègues', eglise: 'Église', autres: 'Autres' };
 function nomGroupe(g) { if (g === 'famille_1') return 'Famille de ' + (S.m ? S.m.marie_1 : '1'); if (g === 'famille_2') return 'Famille de ' + (S.m ? S.m.marie_2 : '2'); return GROUPES[g] || g; }
 var STATUTS = { a_envoyer: 'À envoyer', envoyee: 'Envoyée', confirmee: 'Confirmée', partielle: 'Partielle', declinee: 'Déclinée', annulee: 'Annulée', en_attente: "Liste d'attente" };
@@ -578,9 +583,10 @@ function vueInvites() {
   var h = '<div class="entete-section"><h1>Invités</h1><div class="actions">' +
           '<button class="btn btn-petit" id="importer" type="button">Importer une liste</button>' +
           '<button class="btn btn-petit btn-plein" id="ajouter" type="button">' + ICO.plus + 'Ajouter</button></div></div>';
+  h += cotesHtml();
   h += '<div class="filtres"><input type="search" id="f-q" placeholder="Rechercher un nom…" value="' + esc(f.q) + '" aria-label="Rechercher">' +
        '<select id="f-statut" aria-label="Statut"><option value="">Tous les statuts</option>' + Object.keys(STATUTS).map(function (k) { return '<option value="' + k + '"' + (f.statut === k ? ' selected' : '') + '>' + STATUTS[k] + '</option>'; }).join('') + '<option value="sans_reponse"' + (f.statut === 'sans_reponse' ? ' selected' : '') + '>Sans réponse</option><option value="demo"' + (f.statut === 'demo' ? ' selected' : '') + '>Démonstration</option></select>' +
-       '<select id="f-table" aria-label="Table"><option value="">Toutes les tables</option><option value="aucune"' + (f.table === 'aucune' ? ' selected' : '') + '>Sans table</option>' + S.tables.map(function (t) { return '<option value="' + esc(t.id) + '"' + (f.table === t.id ? ' selected' : '') + '>' + esc(nomTable(t)) + '</option>'; }).join('') + '</select></div>';
+       '<select id="f-table" aria-label="Table"><option value="">Toutes les tables</option><option value="aucune"' + (f.table === 'aucune' ? ' selected' : '') + '>Sans table</option>' + tablesDuCote(f.cote).map(function (t) { return '<option value="' + esc(t.id) + '"' + (f.table === t.id ? ' selected' : '') + '>' + esc(nomTable(t)) + '</option>'; }).join('') + '</select></div>';
   h += '<p class="compte" id="compte-invites"></p><ul class="liste" id="liste-invites"></ul>';
   $('#vue').innerHTML = h;
   $('#ajouter').addEventListener('click', function () { formInvite(null); });
@@ -588,12 +594,32 @@ function vueInvites() {
   $('#f-q').addEventListener('input', function (e) { f.q = e.target.value; listeInvites(); });
   $('#f-statut').addEventListener('change', function (e) { f.statut = e.target.value; listeInvites(); });
   $('#f-table').addEventListener('change', function (e) { f.table = e.target.value; listeInvites(); });
+  $$('.cotes button').forEach(function (b) { b.addEventListener('click', function () { f.cote = b.getAttribute('data-cote'); f.table = ''; stock.ecrire('admin-cote', f.cote); vueInvites(); }); });
   listeInvites();
+}
+/* Listes séparées par famille : côté 1 = famille du/de la marié(e) 1, côté 2 = famille du/de la marié(e) 2, « x » = amis, église, autres */
+function coteDe(i) { return i.groupe === 'famille_1' ? '1' : i.groupe === 'famille_2' ? '2' : 'x'; }
+function prenom(n) { return String(n || '').trim().split(/\s+/)[0] || n; }
+function cotesHtml() {
+  var f = S.filtres, n = { '1': [], '2': [], x: [] };
+  S.invites.forEach(function (i) { n[coteDe(i)].push(i); });
+  if (f.cote === 'x' && !n.x.length) f.cote = '1';
+  var b = function (c, titre, l) { var p = l.filter(compte).reduce(function (s, i) { return s + pers(i); }, 0);
+    return '<button type="button" data-cote="' + c + '" aria-pressed="' + (f.cote === c) + '"' + (c === '1' || c === '2' ? ' title="Famille de ' + esc(c === '1' ? S.m.marie_1 : S.m.marie_2) + '"' : '') + '>' + esc(titre) + '<small>' + l.length + ' inv. · ' + p + ' p.</small></button>'; };
+  return '<div class="cotes" role="group" aria-label="Liste">' + b('1', prenom(S.m.marie_1), n['1']) + b('2', prenom(S.m.marie_2), n['2']) +
+    (n.x.length ? b('x', 'Autres', n.x) : '') + b('tous', 'Tous', S.invites) + '</div>';
+}
+function tablesDuCote(c) {           // tables occupées par ce côté, puis tables vides
+  if (!c || c === 'tous') return S.tables;
+  var ids = {}; S.invites.forEach(function (i) { if (i.table_id && coteDe(i) === c) ids[i.table_id] = 1; });
+  var occ = {}; S.invites.forEach(function (i) { if (i.table_id) occ[i.table_id] = 1; });
+  return S.tables.filter(function (t) { return ids[t.id] || !occ[t.id]; });
 }
 function nomTable(t) { return /^\d+$/.test(t.nom) ? 'Table ' + t.nom : t.nom; }
 function listeInvites() {
   var f = S.filtres, q = norm(f.q);
   var l = S.invites.filter(function (i) {
+    if (f.cote && f.cote !== 'tous' && coteDe(i) !== f.cote) return false;
     if (q && norm(i.nom).indexOf(q) < 0 && String(i.telephone || '').replace(/\D/g, '').indexOf(q.replace(/\D/g, '') || '§') < 0) return false;
     if (f.statut === 'sans_reponse') { if (!reel(i) || (S.rep[i.id] && Object.keys(S.rep[i.id]).length)) return false; }
     else if (f.statut === 'demo') { if (!i.demo) return false; }
@@ -603,7 +629,7 @@ function listeInvites() {
     return true;
   });
   var p = l.filter(compte).reduce(function (s, i) { return s + pers(i); }, 0);
-  $('#compte-invites').textContent = pluriel(l.length, 'invitation', 'invitations') + ' · ' + pluriel(p, 'personne', 'personnes') + (l.length !== S.invites.length ? ' (filtré sur ' + S.invites.length + ')' : '');
+  $('#compte-invites').textContent = pluriel(l.length, 'invitation', 'invitations') + ' · ' + pluriel(p, 'personne', 'personnes') + (f.q || f.statut || f.table ? ' (filtré)' : '');
   $('#liste-invites').innerHTML = l.length ? l.map(carteInvite).join('') : '<li class="carte">' + (S.invites.length ? 'Aucun invité ne correspond.' : 'Aucun invité pour l\'instant. Ajoutez-en un, ou importez une liste « Nom ; numéro ».') + '</li>';
   $$('#liste-invites [data-act]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -664,7 +690,7 @@ function optionsTables(sel, pourInvite) {
 }
 function formInvite(id) {
   var i = id ? S.invites.filter(function (x) { return x.id === id; })[0] : null;
-  var v = i || { nom: '', telephone: '', via_relais: false, groupe: 'autres', adultes: 1, enfants: 0, table_id: '', evenements: S.ev.map(function (e) { return e.id; }), accompagnants: [], regimes: '', notes: '', demo: false, statut: 'a_envoyer' };
+  var v = i || { nom: '', telephone: '', via_relais: false, groupe: ({ '1': 'famille_1', '2': 'famille_2' })[S.filtres.cote] || 'autres', adultes: 1, enfants: 0, table_id: '', evenements: S.ev.map(function (e) { return e.id; }), accompagnants: [], regimes: '', notes: '', demo: false, statut: 'a_envoyer' };
   var lecture = !gestion();
   var c = '';
   if (i) c += '<div class="champ"><span class="lib">Lien personnel <span class="aide">(ne change pas si vous modifiez le nom)</span></span><span class="code">' + esc(lienInvite(i)) + '</span>' +
@@ -768,7 +794,7 @@ function formImport() {
   var c = '<p class="aide" style="margin-top:0">Une ligne par invitation : <b>Nom ; numéro</b>, et si besoin <b>; adultes ; enfants</b>. Exemple :</p>' +
           '<span class="code">Couple Mukendi ; 0991234567 ; 2<br>Maman Thérèse ; ; 1<br>Famille Kasongo ; +243 81 234 5678 ; 2 ; 3</span>' +
           '<div class="champ"><label for="im-texte">Liste</label><textarea id="im-texte" rows="8" placeholder="Nom ; numéro"></textarea></div>' +
-          '<div class="deux"><div class="champ"><label for="im-groupe">Groupe</label><select id="im-groupe">' + Object.keys(GROUPES).map(function (g) { return '<option value="' + g + '"' + (g === 'autres' ? ' selected' : '') + '>' + esc(nomGroupe(g)) + '</option>'; }).join('') + '</select></div>' +
+          '<div class="deux"><div class="champ"><label for="im-groupe">Groupe</label><select id="im-groupe">' + Object.keys(GROUPES).map(function (g) { return '<option value="' + g + '"' + (g === (({ '1': 'famille_1', '2': 'famille_2' })[S.filtres.cote] || 'autres') ? ' selected' : '') + '>' + esc(nomGroupe(g)) + '</option>'; }).join('') + '</select></div>' +
           '<div class="champ"><label for="im-table">Table</label><select id="im-table">' + optionsTables('') + '</select></div></div>' +
           '<div class="champ"><span class="lib">Invités à</span><div class="cases">' + S.ev.map(function (e) { return '<label class="case"><input type="checkbox" class="im-ev" value="' + esc(e.id) + '" checked>' + esc(e.titre) + '</label>'; }).join('') + '</div></div>' +
           '<label class="case"><input type="checkbox" id="im-relais">Sans numéro → passer par le relais</label>' +
