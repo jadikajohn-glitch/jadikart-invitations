@@ -1115,7 +1115,13 @@ function telechargerInvitation() {
     if (fond) { x.save(); arrondi(150, basY, W - 300, 150, 28); x.fillStyle = 'rgba(250,246,238,.9)'; x.fill(); x.lineWidth = 1.5; x.strokeStyle = C.accent; x.stroke(); x.restore(); }
     texte(bas1, basY + 56, '600 32px ' + SANS, C.encre2, 740);
     texte(bas2, basY + 116, '600 42px ' + SERIF, C.encre, 740);
-    numero(fond ? 92 : 100, Math.min(H - 48, basY + 196), 'left');
+    var basNum = Math.min(H - 48, basY + 196);
+    numero(fond ? 92 : 100, basNum, 'left');
+    // Signature du studio, en bas à droite sur la même ligne que le numéro de série
+    x.save(); x.font = 'italic 600 26px ' + SERIF; x.textAlign = 'right'; x.textBaseline = 'alphabetic';
+    var sig = 'Created by Jadik\'Art Design · Lshi';
+    x.lineJoin = 'round'; x.lineWidth = 6; x.strokeStyle = 'rgba(255,255,255,.95)'; x.strokeText(sig, W - (fond ? 92 : 100), basNum);
+    x.fillStyle = C.encre; x.fillText(sig, W - (fond ? 92 : 100), basNum); x.restore();
 
     if (DEMO) { x.save(); x.translate(W / 2, H / 2); x.rotate(-0.45); x.font = '700 120px ' + SANS; x.fillStyle = 'rgba(154,122,46,.22)'; x.textAlign = 'center'; x.fillText(t('demo_filigrane'), 0, 0); x.restore(); }
     cv.toBlob(function (blob) {
